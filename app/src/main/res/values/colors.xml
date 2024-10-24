@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Cores principais -->
+    <color name="primary_yellow">#fbee0f</color>
+    <color name="primary_purple">#7f4aa4</color>
+
+    <!-- Cores complementares -->
+    <color name="violet">#6b329e</color>
+    <color name="purple">#836ac3</color>
+    <color name="light_purple">#d1b8e7</color>
+    <color name="orange">#f4a500</color>
+    <color name="light_orange">#fbcf92</color>
+
+    <!-- Cores neutras -->
+    <color name="white">#ffffff</color>
+    <color name="light_white">#f2f2f2</color>
+    <color name="dark_grey">#303030</color>
 </resources>
