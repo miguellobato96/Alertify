@@ -12,15 +12,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Alertify"
         tools:targetApi="31">
+
+        <!-- Splash Screen Activity -->
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="true">
+            <!-- Set SplashActivity as Launcher Activity -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <!-- LogIn Activity -->
+        <activity
+            android:name=".LogIn"
+            android:exported="true" />
+
+        <!-- SignUp Activity -->
+        <activity
+            android:name=".SignUp"
+            android:exported="true" />
+
+        <!-- Home Activity -->
+        <activity
+            android:name=".Home"
+            android:exported="true" />
+
+    </application>
 </manifest>
