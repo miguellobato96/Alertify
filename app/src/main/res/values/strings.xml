@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Alertify</string>
+    <string name="contact_display">%1$s - %2$s</string>
 </resources>

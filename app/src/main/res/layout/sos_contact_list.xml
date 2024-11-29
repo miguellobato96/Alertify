@@ -1,6 +1,100 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/light_purple">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/emergency_contacts_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:text="Emergency\nContacts"
+        android:textColor="#000000"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <ImageButton
+        android:id="@+id/question_mark_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="Info about emergency contacts"
+        android:background="?android:attr/selectableItemBackground" />
+
+    <ScrollView
+        android:id="@+id/contact_list_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/emergency_contacts_title"
+        android:layout_above="@id/contact_buttons"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="List of emergency contacts">
+
+        <LinearLayout
+            android:id="@+id/contact_list_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="24dp" />
+    </ScrollView>
+
+
+    <LinearLayout
+        android:id="@+id/contact_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_above="@id/footer_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="40dp"
+        android:paddingHorizontal="16dp">
+
+        <Button
+            android:id="@+id/remove_contact_button"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:background="#7f4aa4"
+            android:text="Remove Contact"
+            android:contentDescription="Removes the last contact from the list"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="17dp"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/add_contact_button"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:background="#fbee0f"
+            android:text="Add Contact"
+            android:contentDescription="Adds a new contact to the list"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/footer_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:text="ALERTIFY"
+        android:importantForAccessibility="no"
+        android:textColor="#fbee0f"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+</RelativeLayout>
