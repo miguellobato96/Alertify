@@ -1,19 +1,22 @@
 package com.example.alertify;
 
+import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputFilter;
-import android.text.Spanned;
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,9 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout contactListContainer;
     private SQLiteDatabase database;
 
-    private boolean deleteMode = false;
-    private Button cancelDeleteButton;
-    private Button confirmDeleteButton;
+    private LinearLayout lastOpenedDropdown;
+    private View lastOpenedContactRow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         contactListContainer = findViewById(R.id.contact_list_container);
         Button addContactButton = findViewById(R.id.add_contact_button);
-        Button removeContactButton = findViewById(R.id.remove_contact_button);
-
         addContactButton.setOnClickListener(view -> showAddContactDialog());
-        removeContactButton.setOnClickListener(view -> enableDeleteMode());
 
         loadContacts();
     }
@@ -57,27 +56,22 @@ public class MainActivity extends AppCompatActivity {
 
         EditText nameInput = new EditText(this);
         nameInput.setHint("Name");
-        nameInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-        nameInput.setFilters(new InputFilter[]{
-                new InputFilter() {
-                    @Override
-                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                        for (int i = start; i < end; i++) {
-                            char currentChar = source.charAt(i);
-                            if (!Character.isLetter(currentChar) && !Character.isSpaceChar(currentChar)) {
-                                return ""; // Reject invalid characters
-                            }
-                        }
-                        return null; // Accept valid input
-                    }
+        nameInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        nameInput.setFilters(new InputFilter[]{(source, start, end, dest, dstart, dend) -> {
+            for (int i = start; i < end; i++) {
+                char currentChar = source.charAt(i);
+                if (!Character.isLetter(currentChar) && !Character.isSpaceChar(currentChar)) {
+                    return ""; // Reject invalid characters
                 }
-        });
+            }
+            return null; // Accept valid input
+        }});
         layout.addView(nameInput);
 
         EditText numberInput = new EditText(this);
         numberInput.setHint("Phone Number");
-        numberInput.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
-        numberInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(9)}); // Limit to 9 digits
+        numberInput.setInputType(InputType.TYPE_CLASS_PHONE);
+        numberInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(9)});
         layout.addView(numberInput);
 
         builder.setView(layout);
@@ -107,95 +101,143 @@ public class MainActivity extends AppCompatActivity {
 
     private void addContactToView(String name, String number) {
         LinearLayout contactRow = new LinearLayout(this);
-        contactRow.setOrientation(LinearLayout.HORIZONTAL);
+        contactRow.setOrientation(LinearLayout.VERTICAL);
         contactRow.setPadding(16, 16, 16, 16);
+        contactRow.setBackgroundColor(Color.TRANSPARENT);
+
+        LinearLayout mainRow = new LinearLayout(this);
+        mainRow.setOrientation(LinearLayout.HORIZONTAL);
 
         ImageView contactIcon = new ImageView(this);
         contactIcon.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
         contactIcon.setImageResource(R.drawable.ic_person);
-        contactRow.addView(contactIcon);
+        mainRow.addView(contactIcon);
 
         TextView contactText = new TextView(this);
+        contactText.setText("Name: " + name + "\nNumber: " + number);
+        contactText.setTextSize(20);
         contactText.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        contactText.setText(name + " - " + number);
-        contactText.setTextSize(18);
-        contactRow.addView(contactText);
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        mainRow.addView(contactText);
+
+        contactRow.addView(mainRow);
+
+        LinearLayout dropdownMenu = new LinearLayout(this);
+        dropdownMenu.setOrientation(LinearLayout.HORIZONTAL);
+        dropdownMenu.setGravity(Gravity.CENTER_HORIZONTAL);
+        dropdownMenu.setVisibility(View.GONE);
+
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(150, 150);
+        iconParams.setMargins(16, 16, 16, 16);
+
+        ImageView deleteIcon = new ImageView(this);
+        deleteIcon.setImageResource(android.R.drawable.ic_menu_delete);
+        deleteIcon.setLayoutParams(iconParams);
+        deleteIcon.setOnClickListener(v -> deleteContact(contactRow, name, number));
+        dropdownMenu.addView(deleteIcon);
+
+        ImageView pinIcon = new ImageView(this);
+        pinIcon.setImageResource(android.R.drawable.ic_menu_myplaces);
+        pinIcon.setLayoutParams(iconParams);
+        pinIcon.setOnClickListener(v -> pinContact(contactRow));
+        dropdownMenu.addView(pinIcon);
+
+        ImageView editIcon = new ImageView(this);
+        editIcon.setImageResource(android.R.drawable.ic_menu_edit);
+        editIcon.setLayoutParams(iconParams);
+        editIcon.setOnClickListener(v -> showEditContactDialog(contactRow, contactText, name, number));
+        dropdownMenu.addView(editIcon);
+
+        contactRow.addView(dropdownMenu);
+
+        contactRow.setOnClickListener(v -> {
+            if (lastOpenedDropdown != null && lastOpenedDropdown != dropdownMenu) {
+                lastOpenedDropdown.setVisibility(View.GONE);
+                if (lastOpenedContactRow != null) {
+                    lastOpenedContactRow.setBackgroundColor(Color.TRANSPARENT);
+                }
+            }
+
+            if (dropdownMenu.getVisibility() == View.GONE) {
+                dropdownMenu.setVisibility(View.VISIBLE);
+
+                ObjectAnimator animatorSlide = ObjectAnimator.ofFloat(dropdownMenu, "translationY", -100f, 0f);
+                animatorSlide.setDuration(300);
+                animatorSlide.setInterpolator(new AccelerateDecelerateInterpolator());
+                animatorSlide.start();
+
+                contactRow.setBackground(getRoundedBackground("#A080A0"));
+
+                lastOpenedDropdown = dropdownMenu;
+                lastOpenedContactRow = contactRow;
+            } else {
+                dropdownMenu.setVisibility(View.GONE);
+                contactRow.setBackgroundColor(Color.TRANSPARENT);
+                lastOpenedDropdown = null;
+                lastOpenedContactRow = null;
+            }
+        });
 
         contactListContainer.addView(contactRow);
-        ScrollView scrollView = findViewById(R.id.contact_list_scrollview);
-        scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
     }
 
-    private void enableDeleteMode() {
-        if (deleteMode) return;
-        deleteMode = true;
-
-        cancelDeleteButton = new Button(this);
-        confirmDeleteButton = new Button(this);
-
-        cancelDeleteButton.setText("Cancel");
-        confirmDeleteButton.setText("Confirm");
-
-        RelativeLayout mainLayout = findViewById(R.id.main);
-
-        RelativeLayout.LayoutParams cancelParams = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT);
-        cancelParams.addRule(RelativeLayout.ALIGN_PARENT_START);
-        cancelParams.setMargins(16, 16, 0, 0);
-        mainLayout.addView(cancelDeleteButton, cancelParams);
-
-        RelativeLayout.LayoutParams confirmParams = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT);
-        confirmParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        confirmParams.setMargins(0, 16, 16, 0);
-        mainLayout.addView(confirmDeleteButton, confirmParams);
-
-        cancelDeleteButton.setOnClickListener(view -> disableDeleteMode());
-        confirmDeleteButton.setOnClickListener(view -> deleteSelectedContacts());
-
-        for (int i = 0; i < contactListContainer.getChildCount(); i++) {
-            LinearLayout contactRow = (LinearLayout) contactListContainer.getChildAt(i);
-            CheckBox checkBox = new CheckBox(this);
-            contactRow.addView(checkBox, 0);
-        }
+    private GradientDrawable getRoundedBackground(String color) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(Color.parseColor(color));
+        drawable.setCornerRadius(30);
+        return drawable;
     }
 
-    private void disableDeleteMode() {
-        deleteMode = false;
-
-        RelativeLayout mainLayout = findViewById(R.id.main);
-        mainLayout.removeView(cancelDeleteButton);
-        mainLayout.removeView(confirmDeleteButton);
-
-        for (int i = 0; i < contactListContainer.getChildCount(); i++) {
-            LinearLayout contactRow = (LinearLayout) contactListContainer.getChildAt(i);
-            contactRow.removeViewAt(0);
-        }
+    private void deleteContact(LinearLayout contactRow, String name, String number) {
+        database.delete("contacts", "name=? AND number=?", new String[]{name, number});
+        contactListContainer.removeView(contactRow);
     }
 
-    private void deleteSelectedContacts() {
-        for (int i = 0; i < contactListContainer.getChildCount(); ) {
-            LinearLayout contactRow = (LinearLayout) contactListContainer.getChildAt(i);
-            CheckBox checkBox = (CheckBox) contactRow.getChildAt(0);
+    private void pinContact(LinearLayout contactRow) {
+        Toast.makeText(this, "Pinned contact feature coming soon!", Toast.LENGTH_SHORT).show();
+    }
 
-            if (checkBox.isChecked()) {
-                TextView contactText = (TextView) contactRow.getChildAt(2);
-                String contactInfo = contactText.getText().toString();
-                String[] parts = contactInfo.split(" - ");
-                String name = parts[0];
-                String number = parts[1];
+    private void showEditContactDialog(LinearLayout contactRow, TextView contactText, String name, String number) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Contact");
 
-                database.delete("contacts", "name=? AND number=?", new String[]{name, number});
-                contactListContainer.removeView(contactRow);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 40);
+
+        EditText nameInput = new EditText(this);
+        nameInput.setText(name);
+        layout.addView(nameInput);
+
+        EditText numberInput = new EditText(this);
+        numberInput.setText(number);
+        numberInput.setInputType(InputType.TYPE_CLASS_PHONE);
+        numberInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(9)});
+        layout.addView(numberInput);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String newName = nameInput.getText().toString().trim();
+            String newNumber = numberInput.getText().toString().trim();
+
+            if (!newName.isEmpty() && !newNumber.isEmpty() && newNumber.length() == 9) {
+                updateContactInDatabase(name, number, newName, newNumber);
+                contactText.setText("Name: " + newName + "\nNumber: " + newNumber);
             } else {
-                i++;
+                Toast.makeText(this, "Both fields are required, and the phone number must be 9 digits.", Toast.LENGTH_SHORT).show();
             }
-        }
-        disableDeleteMode();
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    private void updateContactInDatabase(String oldName, String oldNumber, String newName, String newNumber) {
+        ContentValues values = new ContentValues();
+        values.put("name", newName);
+        values.put("number", newNumber);
+        database.update("contacts", values, "name=? AND number=?", new String[]{oldName, oldNumber});
     }
 
     private void loadContacts() {
