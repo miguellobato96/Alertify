@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Alertify</string>
+    <string name="welcome_message">Welcome to Alertify!</string>
+    <string name="login_button">Log In</string>
+    <string name="signup_button">Sign Up</string>
 </resources>

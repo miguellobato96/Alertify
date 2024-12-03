@@ -10,10 +10,11 @@
         android:id="@+id/tvLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ALERTIFY"
+        android:text="Alertify"
         android:textColor="@color/primary_yellow"
         android:textSize="36sp"
         android:textStyle="bold"
+        android:fontFamily="@font/anton_regular"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp" />
 
@@ -26,6 +27,7 @@
         android:textColor="@color/dark_grey"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:fontFamily="@font/prompt_regular"
         android:layout_below="@id/tvLogo"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
@@ -40,6 +42,7 @@
         android:backgroundTint="@color/primary_purple"
         android:textColor="@color/dark_grey"
         android:textColorHint="@color/purple"
+        android:fontFamily="@font/prompt_regular"
         android:layout_below="@id/tvLoginTitle"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp" />
@@ -54,6 +57,7 @@
         android:backgroundTint="@color/primary_purple"
         android:textColor="@color/dark_grey"
         android:textColorHint="@color/purple"
+        android:fontFamily="@font/prompt_regular"
         android:layout_below="@id/etEmail"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
@@ -66,6 +70,7 @@
         android:text="Log In"
         android:backgroundTint="@color/primary_purple"
         android:textColor="@color/light_white"
+        android:fontFamily="@font/prompt_regular"
         android:layout_below="@id/etPassword"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp" />
@@ -78,6 +83,7 @@
         android:text="Forgot Password?"
         android:textColor="@color/primary_purple"
         android:textSize="14sp"
+        android:fontFamily="@font/prompt_regular"
         android:layout_below="@id/btnLogin"
         android:layout_alignParentStart="true"
         android:layout_marginStart="40dp"
@@ -91,6 +97,7 @@
         android:text="Sign Up"
         android:textColor="@color/primary_purple"
         android:textSize="14sp"
+        android:fontFamily="@font/prompt_regular"
         android:layout_below="@id/btnLogin"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="40dp"
@@ -104,6 +111,7 @@
         android:text="Developed by MAGIC Engineering"
         android:textColor="@color/primary_purple"
         android:textSize="12sp"
+        android:fontFamily="@font/prompt_regular"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp" />

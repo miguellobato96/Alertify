@@ -20,6 +20,7 @@
             android:textColor="@color/primary_yellow"
             android:textSize="48sp"
             android:textStyle="bold"
+            android:fontFamily="@font/anton_regular"
             android:layout_gravity="center" />
 
         <!-- Tagline -->
@@ -31,6 +32,7 @@
             android:textColor="@color/primary_yellow"
             android:textSize="28sp"
             android:textStyle="bold"
+            android:fontFamily="@font/prompt_regular"
             android:layout_gravity="center" />
 
         <!-- Developer Credit -->
@@ -41,6 +43,7 @@
             android:text="Developed by Magic Engineering"
             android:textColor="@color/primary_yellow"
             android:textSize="14sp"
+            android:fontFamily="@font/prompt_regular"
             android:layout_gravity="center" />
 
     </LinearLayout>

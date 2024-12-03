@@ -13,5 +13,6 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/primary_yellow"
+        android:fontFamily="@font/anton_regular"
         android:layout_centerInParent="true" />
 </RelativeLayout>
