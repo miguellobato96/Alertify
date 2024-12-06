@@ -2,7 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_purple">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/primary_purple"
+    android:orientation="vertical">
 
     <!-- Example content for the Home page -->
     <TextView
@@ -15,4 +17,52 @@
         android:textColor="@color/primary_yellow"
         android:fontFamily="@font/anton_regular"
         android:layout_centerInParent="true" />
+    <!-- Button that opens Sidebar -->
+    <ImageButton
+        android:id="@+id/open_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/icons8_settings"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+    <View
+        android:id="@+id/background_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone" />
+
+    <!-- Sidebar (Settings) -->
+    <RelativeLayout
+        android:id="@+id/sidebar_layout"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignParentEnd="true"
+        android:background="@color/light_purple"
+        tools:visibility="visible"
+        android:visibility="gone"
+        android:clickable="true">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Settings"
+            android:fontFamily="@font/prompt_regular"
+            android:textSize="24sp"
+            android:padding="16dp" />
+
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:color="@color/black"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_margin="16dp" />
+    </RelativeLayout>
 </RelativeLayout>
