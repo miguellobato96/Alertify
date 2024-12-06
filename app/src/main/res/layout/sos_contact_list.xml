@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_centerHorizontal="true"
-        android:text="Emergency Contacts"
+        android:text="Emergency\nContacts"
         android:textColor="#000000"
         android:textSize="40sp"
         android:textStyle="bold"
@@ -22,9 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/emergency_contacts_title"
-        android:layout_above="@id/add_contact_button"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="80dp"
         android:contentDescription="List of contacts">
 
         <LinearLayout
@@ -35,15 +33,19 @@
             android:paddingHorizontal="24dp" />
     </ScrollView>
 
+    <!-- Add Button -->
     <Button
         android:id="@+id/add_contact_button"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
-        android:background="#7f4aa4"
-        android:text="Add Contact"
+        android:background="@drawable/add_contact"
+        android:text="+"
         android:textColor="#FFFFFF"
+        android:textSize="30sp"
         android:textStyle="bold"
-        android:textSize="18sp" />
+        android:gravity="center"
+        android:contentDescription="Add Contact" />
 </RelativeLayout>
