@@ -5,6 +5,18 @@
     android:layout_height="match_parent"
     android:background="@color/light_purple">
 
+    <!-- Back Arrow -->
+    <ImageButton
+        android:id="@+id/back_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_person"
+        android:contentDescription="Back"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
+
     <TextView
         android:id="@+id/emergency_contacts_title"
         android:layout_width="wrap_content"

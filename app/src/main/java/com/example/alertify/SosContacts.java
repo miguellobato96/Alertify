@@ -11,6 +11,7 @@ import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -35,6 +36,10 @@ public class SosContacts extends AppCompatActivity {
 
         contactListContainer = findViewById(R.id.contact_list_container);
         Button addContactButton = findViewById(R.id.add_contact_button);
+
+        // Back Button
+        ImageButton backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> finish()); // Close the activity to go back to the previous screen
 
         // Open Contacts App
         addContactButton.setOnClickListener(view -> openContactsPicker());
