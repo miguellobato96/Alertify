@@ -8,8 +8,10 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -27,13 +29,17 @@ public class SosContacts extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sos_contact_list);
+        setContentView(R.layout.sos_contact_list);
 
         DBHelper dbHelper = new DBHelper(this);
         database = dbHelper.getWritableDatabase();
 
         contactListContainer = findViewById(R.id.contact_list_container);
         Button addContactButton = findViewById(R.id.add_contact_button);
+
+        // Back Button
+        ImageButton backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> finish()); // Close the activity to go back to the previous screen
 
         // Open Contacts App
         addContactButton.setOnClickListener(view -> openContactsPicker());
@@ -118,7 +124,7 @@ public class SosContacts extends AppCompatActivity {
 
     private void showDropdownMenu(View anchor, LinearLayout contactRow, String name, String number) {
         // Inflate dropdown menu layout
-        View dropdownMenu = getLayoutInflater().inflate(R.layout.activity_dropdown_layout, null);
+        View dropdownMenu = getLayoutInflater().inflate(R.layout.dropdown_layout, null);
 
         // Create PopupWindow
         PopupWindow popupWindow = new PopupWindow(
