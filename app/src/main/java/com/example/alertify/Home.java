@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.widget.Button;
 
 public class Home extends AppCompatActivity {
 
@@ -26,6 +28,9 @@ public class Home extends AppCompatActivity {
         sidebarLayout = findViewById(R.id.sidebar_layout);
         backgroundOverlay = findViewById(R.id.background_overlay);
 
+        // Settings -> SOS button
+        Button sosContactsButton = findViewById(R.id.btn_sos_contacts);
+
         // Btn open sidebar
         openSettingsButton.setOnClickListener(v -> openSidebar());
 
@@ -34,6 +39,12 @@ public class Home extends AppCompatActivity {
         // Close sidebar when button clicked
         closeButton = findViewById(R.id.close_button);
         closeButton.setOnClickListener(v -> closeSidebar());
+
+        // Navigate to SosContacts page
+        sosContactsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Home.this, SosContacts.class);
+            startActivity(intent);
+        });
 
     }
 

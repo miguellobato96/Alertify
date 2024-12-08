@@ -41,6 +41,10 @@
         <activity
             android:name=".Home"
             android:exported="true" />
+        <!-- SOS Contacts Activity -->
+        <activity android:name=".SosContacts"
+                  android:exported="true"/>
+
 
 
     </application>
