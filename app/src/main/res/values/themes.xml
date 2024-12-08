@@ -6,4 +6,5 @@
     </style>
 
     <style name="Theme.Alertify" parent="Base.Theme.Alertify" />
+
 </resources>
