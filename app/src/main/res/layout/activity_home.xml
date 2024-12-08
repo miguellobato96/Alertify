@@ -51,7 +51,8 @@
             android:layout_height="wrap_content"
             android:text="Settings"
             android:fontFamily="@font/prompt_regular"
-            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textSize="24dp"
             android:padding="16dp" />
 
         <ImageButton
@@ -64,5 +65,42 @@
             android:color="@color/black"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:layout_margin="16dp" />
+        <Button
+            android:id="@+id/btn_sos_contacts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SOS Contacts"
+            android:layout_below="@id/close_button"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
+
+        <Button
+            android:id="@+id/btn_safety_tips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safety Tips"
+            android:layout_below="@id/btn_sos_contacts"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
+        <Button
+            android:id="@+id/btn_about_us"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safety Tips"
+            android:layout_below="@id/btn_safety_tips"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
+        <Button
+            android:id="@+id/btn_terms_conditions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Terms and conditions"
+            android:layout_below="@id/btn_about_us"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
     </RelativeLayout>
 </RelativeLayout>
