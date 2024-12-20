@@ -39,68 +39,105 @@
         android:id="@+id/sidebar_layout"
         android:layout_width="300dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:layout_alignParentEnd="true"
         android:background="@color/light_purple"
         tools:visibility="visible"
+        android:clickable="true"
         android:visibility="gone"
-        android:clickable="true">
+        >
 
         <TextView
+            android:id="@+id/settingstv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Settings"
+            android:textColor="@color/dark_grey"
             android:fontFamily="@font/prompt_regular"
             android:textStyle="bold"
-            android:textSize="24dp"
-            android:padding="16dp" />
+            android:textSize="28sp"
+            android:padding="16dp"
+            android:layout_marginTop="20dp"/>
 
         <ImageButton
             android:id="@+id/close_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:color="@color/black"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/close_icon"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:layout_margin="16dp" />
+            android:layout_marginTop="45dp"
+            android:layout_marginEnd="15dp"
+             />
+        <!-- Home Button -->
+        <TextView
+            android:id="@+id/btn_home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Home"
+            android:textColor="@color/orange"
+            android:textAlignment="textStart"
+            android:textSize="20sp"
+            android:fontFamily="@font/prompt_regular"
+            android:background="@color/purple"
+            android:padding="16dp"
+            android:layout_below="@+id/settingstv"
+            android:backgroundTintMode="src_in"
+            android:drawablePadding="8dp"
+            android:layout_alignParentStart="true" />
         <Button
             android:id="@+id/btn_sos_contacts"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="SOS Contacts"
-            android:layout_below="@id/close_button"
-            android:layout_marginTop="32dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp" />
+            android:textStyle="bold"
+            android:textAlignment="textStart"
+            android:textSize="20sp"
+            android:layout_below="@id/btn_home"
+            android:padding="16dp"
+            android:fontFamily="@font/prompt_regular"
+            android:textColor="@color/dark_grey"
+            android:background="@android:color/transparent"/>
 
         <Button
             android:id="@+id/btn_safety_tips"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Safety Tips"
+            android:textStyle="bold"
+            android:textAlignment="textStart"
+            android:textSize="20sp"
             android:layout_below="@id/btn_sos_contacts"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp" />
+            android:padding="16dp"
+            android:fontFamily="@font/prompt_regular"
+            android:textColor="@color/dark_grey"
+            android:background="@android:color/transparent"/>
         <Button
             android:id="@+id/btn_about_us"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Safety Tips"
+            android:text="About Us"
+            android:textStyle="bold"
+            android:textAlignment="textStart"
+            android:textSize="20sp"
             android:layout_below="@id/btn_safety_tips"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp" />
+            android:padding="16dp"
+            android:fontFamily="@font/prompt_regular"
+            android:textColor="@color/dark_grey"
+            android:background="@android:color/transparent" />
         <Button
             android:id="@+id/btn_terms_conditions"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textAlignment="textStart"
             android:text="Terms and conditions"
+            android:textSize="20sp"
             android:layout_below="@id/btn_about_us"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp" />
+            android:padding="16dp"
+            android:layout_margin="0dp"
+            android:fontFamily="@font/prompt_regular"
+            android:textColor="@color/dark_grey"
+            android:background="@android:color/transparent"/>
     </RelativeLayout>
 </RelativeLayout>
