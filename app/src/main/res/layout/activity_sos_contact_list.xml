@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
@@ -17,6 +18,7 @@
         android:contentDescription="Back"
         android:background="?android:attr/selectableItemBackgroundBorderless" />
 
+    <!-- Title -->
     <TextView
         android:id="@+id/emergency_contacts_title"
         android:layout_width="wrap_content"
@@ -29,21 +31,57 @@
         android:textStyle="bold"
         android:gravity="center" />
 
+    <!-- ScrollView for contact lists -->
     <ScrollView
-        android:id="@+id/contact_list_scrollview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/emergency_contacts_title"
+        android:layout_above="@id/add_contact_button"
         android:contentDescription="List of contacts">
 
         <LinearLayout
-            android:id="@+id/contact_list_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp" />
+            android:paddingHorizontal="24dp">
+
+            <!-- Pinned Contacts Section -->
+            <TextView
+                android:id="@+id/pinned_contacts_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pinned Contacts"
+                android:textColor="#000000"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/pinned_contact_list_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible" />
+
+            <!-- Regular Contacts Section -->
+            <TextView
+                android:id="@+id/contacts_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contacts"
+                android:textColor="#000000"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/contact_list_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
     </ScrollView>
 
+    <!-- Add Contact Button -->
     <Button
         android:id="@+id/add_contact_button"
         android:layout_width="70dp"
