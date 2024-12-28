@@ -45,6 +45,7 @@ public class SosContacts extends AppCompatActivity {
         addContactButton.setOnClickListener(view -> openContactsPicker());
 
         loadContacts();
+        updateNoContactsMessage();
     }
 
     private void openContactsPicker() {
@@ -82,6 +83,7 @@ public class SosContacts extends AppCompatActivity {
                 }
             }
         }
+        updateNoContactsMessage();
     }
 
     private void addContactToDatabase(String name, String number, boolean isPinned) {
@@ -152,6 +154,7 @@ public class SosContacts extends AppCompatActivity {
         }
 
         dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name, number, isPinned));
+        updateNoContactsMessage();
     }
 
     private void showDropdownMenu(View anchor, LinearLayout contactRow, String name, String number, boolean isPinned) {
@@ -209,6 +212,7 @@ public class SosContacts extends AppCompatActivity {
         } else {
             contactListContainer.removeView(contactRow);
         }
+        updateNoContactsMessage();
     }
 
     private void loadContacts() {
@@ -248,6 +252,8 @@ public class SosContacts extends AppCompatActivity {
             addContactToView(name, number, false);
         }
         unpinnedCursor.close();
+
+        updateNoContactsMessage();
     }
 
     private void updateContactInDatabase(String name, String number, boolean isPinned) {
@@ -272,6 +278,15 @@ public class SosContacts extends AppCompatActivity {
         }
         cursor.close();
         return nextOrder;
+    }
+
+    private void updateNoContactsMessage() {
+        TextView noContactsMessage = findViewById(R.id.no_contacts_message);
+        if (contactListContainer.getChildCount() == 0 && pinnedContactListContainer.getChildCount() == 0) {
+            noContactsMessage.setVisibility(View.VISIBLE);
+        } else {
+            noContactsMessage.setVisibility(View.GONE);
+        }
     }
 
     @Override

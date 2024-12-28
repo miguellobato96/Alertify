@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
@@ -30,6 +29,19 @@
         android:textSize="40sp"
         android:textStyle="bold"
         android:gravity="center" />
+
+    <!-- No Contacts Message -->
+    <TextView
+        android:id="@+id/no_contacts_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Não existem contactos adicionados, clique no botão do canto inferior direito para adicionar algum."
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:visibility="gone" />
 
     <!-- ScrollView for contact lists -->
     <ScrollView
