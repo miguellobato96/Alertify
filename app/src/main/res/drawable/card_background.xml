@@ -1,0 +1,17 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Shadow Layer -->
+    <item>
+        <shape>
+            <corners android:radius="16dp" />
+            <solid android:color="#33000000" />
+        </shape>
+    </item>
+
+    <!-- Card Background Layer -->
+    <item android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="2dp">
+        <shape>
+            <corners android:radius="16dp" />
+            <solid android:color="@color/primary_purple" />
+        </shape>
+    </item>
+</layer-list>
