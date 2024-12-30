@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.View;
@@ -59,83 +58,53 @@ public class SosContacts extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == CONTACT_PICKER_REQUEST && resultCode == RESULT_OK && data != null) {
-            Uri contactUri = data.getData();
-            if (contactUri != null) {
-                String[] projection = {
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                        ContactsContract.CommonDataKinds.Phone.NUMBER
-                };
-
-                try (Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null)) {
-                    if (cursor != null && cursor.moveToFirst()) {
-                        String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                        String number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
-
-                        if (!isContactAlreadyExists(name, number)) {
-                            addContactToDatabase(name, number, false);
-                            addContactToView(name, number, false);
-                        } else {
-                            Toast.makeText(this, "This contact already exists!", Toast.LENGTH_SHORT).show();
-                        }
+            try (Cursor cursor = getContentResolver().query(data.getData(), new String[]{
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                    ContactsContract.CommonDataKinds.Phone.NUMBER}, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    if (!isContactAlreadyExists(name)) {
+                        addContactToDatabase(name, false); // Default unpinned
+                        addContactToView(name, false);
+                    } else {
+                        Toast.makeText(this, "This contact already exists!", Toast.LENGTH_SHORT).show();
                     }
-                } catch (Exception e) {
-                    Toast.makeText(this, "Error retrieving contact details.", Toast.LENGTH_SHORT).show();
                 }
+            } catch (Exception e) {
+                Toast.makeText(this, "Error retrieving contact details.", Toast.LENGTH_SHORT).show();
             }
+            updateNoContactsMessage();
         }
-        updateNoContactsMessage();
     }
 
-    private void addContactToDatabase(String name, String number, boolean isPinned) {
+    private void addContactToDatabase(String name, boolean isPinned) {
         ContentValues values = new ContentValues();
         values.put("name", name);
-        values.put("number", number);
         values.put("isPinned", isPinned ? 1 : 0);
-
-        if (isPinned) {
-            int nextOrder = getNextPinnedOrder();
-            values.put("pinned_order", nextOrder);
-        } else {
-            values.putNull("pinned_order");
-        }
-
         database.insert("contacts", null, values);
     }
 
-    private boolean isContactAlreadyExists(String name, String number) {
-        Cursor cursor = database.query(
-                "contacts",
-                null,
-                "name=? AND number=?",
-                new String[]{name, number},
-                null,
-                null,
-                null
-        );
-
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        return exists;
+    private boolean isContactAlreadyExists(String name) {
+        try (Cursor cursor = database.query("contacts", null, "name=?", new String[]{name}, null, null, null)) {
+            return cursor.getCount() > 0;
+        }
     }
 
-    private void addContactToView(String name, String number, boolean isPinned) {
-        if (isPinned && pinnedContactListContainer.getChildCount() >= MAX_PINNED_CONTACTS) {
-            Toast.makeText(this, "You can only pin up to " + MAX_PINNED_CONTACTS + " contacts.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void addContactToView(String name, boolean isPinned) {
         LinearLayout contactRow = new LinearLayout(this);
         contactRow.setOrientation(LinearLayout.HORIZONTAL);
         contactRow.setPadding(16, 16, 16, 16);
         contactRow.setBackgroundColor(Color.TRANSPARENT);
 
-        ImageView contactIcon = new ImageView(this);
-        contactIcon.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
-        contactIcon.setImageResource(R.drawable.ic_person);
-        contactRow.addView(contactIcon);
+        ImageView starIcon = new ImageView(this);
+        starIcon.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
+        starIcon.setImageResource(isPinned ? R.drawable.starwbg : R.drawable.starnobg);
+        starIcon.setTag(isPinned); // Store pin state
+        starIcon.setOnClickListener(v -> togglePinState(starIcon, contactRow, name, isPinned));
+        contactRow.addView(starIcon);
 
         TextView contactText = new TextView(this);
-        contactText.setText(name + "\n" + number);
+        contactText.setText(name);
         contactText.setTextSize(18);
         contactText.setLayoutParams(new LinearLayout.LayoutParams(
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
@@ -144,6 +113,7 @@ public class SosContacts extends AppCompatActivity {
         ImageView dropdownButton = new ImageView(this);
         dropdownButton.setImageResource(R.drawable.t_dots);
         dropdownButton.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
+        dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name));
         contactRow.addView(dropdownButton);
 
         if (isPinned) {
@@ -153,11 +123,34 @@ public class SosContacts extends AppCompatActivity {
             contactListContainer.addView(contactRow);
         }
 
-        dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name, number, isPinned));
         updateNoContactsMessage();
     }
 
-    private void showDropdownMenu(View anchor, LinearLayout contactRow, String name, String number, boolean isPinned) {
+    private void togglePinState(ImageView starIcon, LinearLayout contactRow, String name, boolean isCurrentlyPinned) {
+        if (isCurrentlyPinned) {
+            // Unpin the contact
+            pinnedContactListContainer.removeView(contactRow);
+            addContactToView(name, false);
+            updateContactInDatabase(name, false);
+        } else {
+            // Pin the contact
+            if (pinnedContactListContainer.getChildCount() >= MAX_PINNED_CONTACTS) {
+                Toast.makeText(this, "You can only pin up to " + MAX_PINNED_CONTACTS + " contacts.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            contactListContainer.removeView(contactRow);
+            addContactToView(name, true);
+            updateContactInDatabase(name, true);
+        }
+    }
+
+    private void updateContactInDatabase(String name, boolean isPinned) {
+        ContentValues values = new ContentValues();
+        values.put("isPinned", isPinned ? 1 : 0);
+        database.update("contacts", values, "name=?", new String[]{name});
+    }
+
+    private void showDropdownMenu(View anchor, LinearLayout contactRow, String name) {
         View dropdownMenu = getLayoutInflater().inflate(R.layout.activity_dropdown_layout, null);
 
         PopupWindow popupWindow = new PopupWindow(
@@ -170,48 +163,19 @@ public class SosContacts extends AppCompatActivity {
         popupWindow.setBackgroundDrawable(getDrawable(R.drawable.dropdown_background));
         popupWindow.setElevation(10);
 
-        TextView pinButton = dropdownMenu.findViewById(R.id.btn_pin);
-        TextView editButton = dropdownMenu.findViewById(R.id.btn_edit);
         TextView deleteButton = dropdownMenu.findViewById(R.id.btn_delete);
 
-        pinButton.setText(isPinned ? "Unpin" : "Pin");
-        pinButton.setOnClickListener(v -> {
-            if (isPinned) {
-                pinnedContactListContainer.removeView(contactRow);
-                addContactToView(name, number, false);
-                updateContactInDatabase(name, number, false);
-            } else {
-                if (pinnedContactListContainer.getChildCount() >= MAX_PINNED_CONTACTS) {
-                    Toast.makeText(this, "You can only pin up to " + MAX_PINNED_CONTACTS + " contacts.", Toast.LENGTH_SHORT).show();
-                } else {
-                    contactListContainer.removeView(contactRow);
-                    addContactToView(name, number, true);
-                    updateContactInDatabase(name, number, true);
-                }
-            }
-            popupWindow.dismiss();
-        });
-
-        editButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Edit clicked for " + name, Toast.LENGTH_SHORT).show();
-            popupWindow.dismiss();
-        });
-
         deleteButton.setOnClickListener(v -> {
-            deleteContact(contactRow, name, number, isPinned);
+            deleteContact(contactRow, name);
             popupWindow.dismiss();
         });
 
         popupWindow.showAsDropDown(anchor, -50, 0);
     }
 
-    private void deleteContact(LinearLayout contactRow, String name, String number, boolean isPinned) {
-        database.delete("contacts", "name=? AND number=?", new String[]{name, number});
-        if (isPinned) {
-            pinnedContactListContainer.removeView(contactRow);
-        } else {
-            contactListContainer.removeView(contactRow);
-        }
+    private void deleteContact(LinearLayout contactRow, String name) {
+        database.delete("contacts", "name=?", new String[]{name});
+        contactListContainer.removeView(contactRow);
         updateNoContactsMessage();
     }
 
@@ -219,74 +183,27 @@ public class SosContacts extends AppCompatActivity {
         pinnedContactListContainer.removeAllViews();
         contactListContainer.removeAllViews();
 
-        Cursor pinnedCursor = database.query(
-                "contacts",
-                null,
-                "isPinned = ?",
-                new String[]{"1"},
-                null,
-                null,
-                "pinned_order ASC"
-        );
-
+        Cursor pinnedCursor = database.query("contacts", null, "isPinned = ?", new String[]{"1"}, null, null, null);
         while (pinnedCursor.moveToNext()) {
             String name = pinnedCursor.getString(pinnedCursor.getColumnIndexOrThrow("name"));
-            String number = pinnedCursor.getString(pinnedCursor.getColumnIndexOrThrow("number"));
-            addContactToView(name, number, true);
+            addContactToView(name, true);
         }
         pinnedCursor.close();
 
-        Cursor unpinnedCursor = database.query(
-                "contacts",
-                null,
-                "isPinned = ?",
-                new String[]{"0"},
-                null,
-                null,
-                "id ASC"
-        );
-
+        Cursor unpinnedCursor = database.query("contacts", null, "isPinned = ?", new String[]{"0"}, null, null, null);
         while (unpinnedCursor.moveToNext()) {
             String name = unpinnedCursor.getString(unpinnedCursor.getColumnIndexOrThrow("name"));
-            String number = unpinnedCursor.getString(unpinnedCursor.getColumnIndexOrThrow("number"));
-            addContactToView(name, number, false);
+            addContactToView(name, false);
         }
         unpinnedCursor.close();
 
         updateNoContactsMessage();
     }
 
-    private void updateContactInDatabase(String name, String number, boolean isPinned) {
-        ContentValues values = new ContentValues();
-        values.put("isPinned", isPinned ? 1 : 0);
-
-        if (isPinned) {
-            int nextOrder = getNextPinnedOrder();
-            values.put("pinned_order", nextOrder);
-        } else {
-            values.putNull("pinned_order");
-        }
-
-        database.update("contacts", values, "name=? AND number=?", new String[]{name, number});
-    }
-
-    private int getNextPinnedOrder() {
-        Cursor cursor = database.rawQuery("SELECT MAX(pinned_order) FROM contacts WHERE isPinned = 1", null);
-        int nextOrder = 1;
-        if (cursor.moveToFirst() && !cursor.isNull(0)) {
-            nextOrder = cursor.getInt(0) + 1;
-        }
-        cursor.close();
-        return nextOrder;
-    }
-
     private void updateNoContactsMessage() {
         TextView noContactsMessage = findViewById(R.id.no_contacts_message);
-        if (contactListContainer.getChildCount() == 0 && pinnedContactListContainer.getChildCount() == 0) {
-            noContactsMessage.setVisibility(View.VISIBLE);
-        } else {
-            noContactsMessage.setVisibility(View.GONE);
-        }
+        boolean noContacts = contactListContainer.getChildCount() == 0 && pinnedContactListContainer.getChildCount() == 0;
+        noContactsMessage.setVisibility(noContacts ? View.VISIBLE : View.GONE);
     }
 
     @Override

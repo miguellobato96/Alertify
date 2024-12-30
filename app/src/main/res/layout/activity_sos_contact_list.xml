@@ -13,7 +13,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/back_arrow"
+        android:src="@drawable/close_icon"
         android:contentDescription="Back"
         android:background="?android:attr/selectableItemBackgroundBorderless" />
 
