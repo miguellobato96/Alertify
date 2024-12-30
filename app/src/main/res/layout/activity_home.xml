@@ -40,7 +40,7 @@
         android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:background="@color/light_purple"
+        android:background="@drawable/rounded_corners"
         tools:visibility="visible"
         android:clickable="true"
         android:visibility="gone"
@@ -138,5 +138,16 @@
             android:fontFamily="@font/prompt_regular"
             android:textColor="@color/dark_grey"
             android:background="@android:color/transparent"/>
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginRight="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:text="Log out"
+            android:textColor="@color/orange"
+            />
     </RelativeLayout>
 </RelativeLayout>
