@@ -68,19 +68,19 @@
                 android:textStyle="bold"
                 android:visibility="visible" />
 
+            <!-- Gap for pinned contacts -->
+            <View
+                android:id="@+id/pinned_contacts_gap"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+
             <LinearLayout
                 android:id="@+id/pinned_contact_list_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="visible" />
-
-            <!-- Gap View -->
-            <View
-                android:id="@+id/pinned_contacts_gap"
-                android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:visibility="gone" />
 
             <!-- Regular Contacts Section -->
             <TextView
