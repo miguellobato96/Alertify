@@ -30,18 +30,6 @@
             android:textSize="18sp" />
     </FrameLayout>
 
-    <!-- Top Buttons -->
-    <!--<ImageView
-        android:id="@+id/menuIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="top"
-        android:contentDescription="Menu"
-        android:src="@drawable/ic_menu"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" /> -->
-
     <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/activeSwitch"
         android:layout_width="wrap_content"
@@ -225,10 +213,11 @@
         android:id="@+id/sidebar_layout"
         android:layout_width="300dp"
         android:layout_height="match_parent"
-        android:background="@color/light_purple"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/rounded_corners"
         tools:visibility="visible"
         android:clickable="true"
         android:visibility="gone">
@@ -325,6 +314,17 @@
             android:fontFamily="@font/prompt_regular"
             android:textColor="@color/dark_grey"
             android:background="@android:color/transparent"/>
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginRight="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:text="Log out"
+            android:textColor="@color/orange"
+            />
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
 
