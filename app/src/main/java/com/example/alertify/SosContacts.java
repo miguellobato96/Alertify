@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -100,7 +101,7 @@ public class SosContacts extends AppCompatActivity {
         starIcon.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
         starIcon.setImageResource(isPinned ? R.drawable.starwbg : R.drawable.starnobg);
         starIcon.setTag(isPinned); // Store pin state
-        starIcon.setOnClickListener(v -> togglePinState(starIcon, contactRow, name, isPinned));
+        starIcon.setOnClickListener(v -> togglePinState(starIcon, contactRow, name));
         contactRow.addView(starIcon);
 
         TextView contactText = new TextView(this);
@@ -113,7 +114,7 @@ public class SosContacts extends AppCompatActivity {
         ImageView dropdownButton = new ImageView(this);
         dropdownButton.setImageResource(R.drawable.t_dots);
         dropdownButton.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
-        dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name));
+        dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name, contactText));
         contactRow.addView(dropdownButton);
 
         if (isPinned) {
@@ -126,31 +127,36 @@ public class SosContacts extends AppCompatActivity {
         updateNoContactsMessage();
     }
 
-    private void togglePinState(ImageView starIcon, LinearLayout contactRow, String name, boolean isCurrentlyPinned) {
-        if (isCurrentlyPinned) {
+    private void togglePinState(ImageView starIcon, LinearLayout contactRow, String name) {
+        boolean isPinned = (boolean) starIcon.getTag();
+        if (isPinned) {
             // Unpin the contact
             pinnedContactListContainer.removeView(contactRow);
-            addContactToView(name, false);
-            updateContactInDatabase(name, false);
+            contactListContainer.addView(contactRow);
+            starIcon.setImageResource(R.drawable.starnobg);
+            starIcon.setTag(false);
+            updateContactPinState(name, false);
         } else {
             // Pin the contact
             if (pinnedContactListContainer.getChildCount() >= MAX_PINNED_CONTACTS) {
-                Toast.makeText(this, "You can only pin up to " + MAX_PINNED_CONTACTS + " contacts.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "You can only pin up to 4 contacts.", Toast.LENGTH_SHORT).show();
                 return;
             }
             contactListContainer.removeView(contactRow);
-            addContactToView(name, true);
-            updateContactInDatabase(name, true);
+            pinnedContactListContainer.addView(contactRow);
+            starIcon.setImageResource(R.drawable.starwbg);
+            starIcon.setTag(true);
+            updateContactPinState(name, true);
         }
     }
 
-    private void updateContactInDatabase(String name, boolean isPinned) {
+    private void updateContactPinState(String name, boolean isPinned) {
         ContentValues values = new ContentValues();
         values.put("isPinned", isPinned ? 1 : 0);
-        database.update("contacts", values, "name=?", new String[]{name});
+        database.update("contacts", values, "name = ?", new String[]{name});
     }
 
-    private void showDropdownMenu(View anchor, LinearLayout contactRow, String name) {
+    private void showDropdownMenu(View anchor, LinearLayout contactRow, String name, TextView contactText) {
         View dropdownMenu = getLayoutInflater().inflate(R.layout.activity_dropdown_layout, null);
 
         PopupWindow popupWindow = new PopupWindow(
@@ -163,7 +169,13 @@ public class SosContacts extends AppCompatActivity {
         popupWindow.setBackgroundDrawable(getDrawable(R.drawable.dropdown_background));
         popupWindow.setElevation(10);
 
+        TextView editButton = dropdownMenu.findViewById(R.id.btn_edit);
         TextView deleteButton = dropdownMenu.findViewById(R.id.btn_delete);
+
+        editButton.setOnClickListener(v -> {
+            enableEditMode(contactRow, contactText, name, anchor);
+            popupWindow.dismiss();
+        });
 
         deleteButton.setOnClickListener(v -> {
             deleteContact(contactRow, name);
@@ -173,8 +185,64 @@ public class SosContacts extends AppCompatActivity {
         popupWindow.showAsDropDown(anchor, -50, 0);
     }
 
+    private void enableEditMode(LinearLayout contactRow, TextView contactText, String oldName, View dropdownButton) {
+        dropdownButton.setVisibility(View.GONE); // Hide the 3-dot button during editing
+
+        contactRow.removeView(contactText);
+
+        EditText editText = new EditText(this);
+        editText.setText(oldName);
+        editText.setTextSize(18);
+        editText.setLayoutParams(new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        contactRow.addView(editText, 1);
+
+        ImageButton confirmButton = new ImageButton(this);
+        confirmButton.setImageResource(android.R.drawable.ic_menu_save); // Simpler checkmark icon
+        confirmButton.setColorFilter(Color.parseColor("#7F4AA4")); // Purple color
+        confirmButton.setBackgroundColor(Color.TRANSPARENT);
+
+        ImageButton cancelButton = new ImageButton(this);
+        cancelButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+        cancelButton.setColorFilter(Color.parseColor("#7F4AA4")); // Purple color
+        cancelButton.setBackgroundColor(Color.TRANSPARENT);
+
+        contactRow.addView(confirmButton);
+        contactRow.addView(cancelButton);
+
+        confirmButton.setOnClickListener(v -> {
+            String newName = editText.getText().toString().trim();
+            if (!newName.isEmpty()) {
+                updateContactInDatabase(oldName, newName);
+                contactRow.removeView(editText);
+                contactRow.removeView(confirmButton);
+                contactRow.removeView(cancelButton);
+                contactText.setText(newName);
+                contactRow.addView(contactText, 1);
+                dropdownButton.setVisibility(View.VISIBLE); // Show the 3-dot button after editing
+                loadContacts(); // Refresh the contacts to ensure data consistency
+            } else {
+                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        cancelButton.setOnClickListener(v -> {
+            contactRow.removeView(editText);
+            contactRow.removeView(confirmButton);
+            contactRow.removeView(cancelButton);
+            contactRow.addView(contactText, 1);
+            dropdownButton.setVisibility(View.VISIBLE); // Show the 3-dot button after canceling
+        });
+    }
+
+    private void updateContactInDatabase(String oldName, String newName) {
+        ContentValues values = new ContentValues();
+        values.put("name", newName);
+        database.update("contacts", values, "name = ?", new String[]{oldName});
+    }
+
     private void deleteContact(LinearLayout contactRow, String name) {
-        database.delete("contacts", "name=?", new String[]{name});
+        database.delete("contacts", "name = ?", new String[]{name});
         contactListContainer.removeView(contactRow);
         updateNoContactsMessage();
     }
