@@ -115,7 +115,7 @@
         android:background="@drawable/add_contact"
         android:text="+"
         android:textColor="#FFFFFF"
-        android:textSize="40sp"
+        android:textSize="30sp"
         android:textStyle="bold"
         android:gravity="center"
         android:contentDescription="Add Contact" />
