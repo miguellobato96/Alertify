@@ -45,7 +45,5 @@
         <activity android:name=".SosContacts"
                   android:exported="true"/>
 
-
-
     </application>
 </manifest>

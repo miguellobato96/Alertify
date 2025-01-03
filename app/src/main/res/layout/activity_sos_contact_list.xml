@@ -68,6 +68,17 @@
                 android:textStyle="bold"
                 android:visibility="visible" />
 
+            <!-- Gap for pinned contacts -->
+            <TextView
+                android:id="@+id/pinned_contacts_gap"
+                android:layout_width="match_parent"
+                android:hint="No pinned contacts added...yet"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:layout_height="32dp" />
+
+
             <LinearLayout
                 android:id="@+id/pinned_contact_list_container"
                 android:layout_width="match_parent"
@@ -104,7 +115,7 @@
         android:background="@drawable/add_contact"
         android:text="+"
         android:textColor="#FFFFFF"
-        android:textSize="40sp"
+        android:textSize="30sp"
         android:textStyle="bold"
         android:gravity="center"
         android:contentDescription="Add Contact" />
