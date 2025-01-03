@@ -10,11 +10,11 @@
         android:id="@+id/tvLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Alertify"
+        android:text="Alertify "
         android:textColor="@color/primary_yellow"
         android:textSize="36sp"
         android:textStyle="bold"
-        android:fontFamily="@font/anton_regular"
+        android:fontFamily="@font/bangers_regular"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp" />
 
@@ -136,6 +136,7 @@
         android:layout_height="wrap_content"
         android:text="Developed by MAGIC Engineering"
         android:textColor="@color/primary_purple"
+        android:textSize="12sp"
         android:fontFamily="@font/prompt_regular"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"

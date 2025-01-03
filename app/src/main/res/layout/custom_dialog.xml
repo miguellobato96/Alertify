@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:background="@drawable/rounded_cornersad"
+        android:layout_gravity="center"
+        android:clipToOutline="true"
+        android:elevation="10dp"
+        android:layout_margin="20dp">
+
+        <TextView
+            android:id="@+id/tvDialogMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Are you sure you want to Log out?"
+            android:textColor="@color/dark_grey"
+            android:textSize="18sp"
+            android:fontFamily="@font/prompt_regular"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/tvDialogMessage"
+            android:gravity="center"
+            android:layout_marginTop="10dp">
+
+            <Button
+                android:id="@+id/btnYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yes"
+                android:backgroundTint="@color/purple"
+                android:textColor="@color/light_white"
+                android:layout_marginRight="20dp" />
+
+            <Button
+                android:id="@+id/btnNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No"
+                android:backgroundTint="@color/purple"
+                android:textColor="@color/light_white"
+                android:layout_marginLeft="20dp"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
