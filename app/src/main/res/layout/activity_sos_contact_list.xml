@@ -72,7 +72,7 @@
             <TextView
                 android:id="@+id/pinned_contacts_gap"
                 android:layout_width="match_parent"
-                android:hint="No pinned contacts added...yet."
+                android:hint="No pinned contacts added...yet"
                 android:layout_marginTop="10dp"
                 android:textStyle="bold"
                 android:textSize="15sp"
