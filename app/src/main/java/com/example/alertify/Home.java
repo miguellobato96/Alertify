@@ -1,12 +1,18 @@
 package com.example.alertify;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.content.Intent;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
 
 public class Home extends AppCompatActivity {
 
@@ -24,6 +30,9 @@ public class Home extends AppCompatActivity {
 
     private boolean isHomeSelected = true; // Flag to track if Home is selected
 
+    private ArrayList<TextView> placeholders;
+    private DBHelper dbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +45,19 @@ public class Home extends AppCompatActivity {
         btnAboutUs = findViewById(R.id.btn_about_us);
         btnTermsConditions = findViewById(R.id.btn_terms_conditions);
         btnLogOut = findViewById(R.id.btn_logout);
+
+        // Initialize placeholders
+        placeholders = new ArrayList<>();
+        placeholders.add(findViewById(R.id.contact_text_1));
+        placeholders.add(findViewById(R.id.contact_text_2));
+        placeholders.add(findViewById(R.id.contact_text_3));
+        placeholders.add(findViewById(R.id.contact_text_4));
+
+        // Initialize database helper
+        dbHelper = new DBHelper(this);
+
+        // Load pinned contacts
+        loadPinnedContacts();
 
         // Set listeners for sidebar buttons
         btnHome.setOnClickListener(v -> {
@@ -52,7 +74,6 @@ public class Home extends AppCompatActivity {
             isHomeSelected = false;
             Intent intent = new Intent(Home.this, SosContacts.class);
             startActivity(intent);
-
         });
 
         btnSafetyTips.setOnClickListener(v -> {
@@ -72,6 +93,7 @@ public class Home extends AppCompatActivity {
             isHomeSelected = false;
             // Navigate to Terms & Conditions page
         });
+
         // Set listener for Logout
         btnLogOut.setOnClickListener(v -> {
             showLogoutDialog(); // dialog confirmation to logout
@@ -87,12 +109,47 @@ public class Home extends AppCompatActivity {
         closeButton = findViewById(R.id.close_button);
         closeButton.setOnClickListener(v -> closeSidebar());
     }
+
     @Override
     protected void onResume() {
         super.onResume();
-        // Sempre que a Home é retomada, o botão "Home" é selecionado
+        // Always reload pinned contacts when Home is resumed
+        loadPinnedContacts();
+
+        // Always select the Home button
         setSelectedButton(btnHome);
         isHomeSelected = true;
+    }
+
+    private void loadPinnedContacts() {
+        // Get readable database
+        SQLiteDatabase database = dbHelper.getReadableDatabase();
+
+        // Query for pinned contacts, ordered by pinned_order
+        Cursor cursor = database.query(
+                "contacts",
+                new String[]{"name"},
+                "isPinned = ?",
+                new String[]{"1"},
+                null,
+                null,
+                "pinned_order ASC"
+        );
+
+        // Clear placeholders and reset to "N/A"
+        for (TextView placeholder : placeholders) {
+            placeholder.setText("N/A");
+        }
+
+        // Populate placeholders with pinned contacts
+        int index = 0;
+        while (cursor.moveToNext() && index < placeholders.size()) {
+            String contactName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            placeholders.get(index).setText(contactName);
+            index++;
+        }
+
+        cursor.close();
     }
 
     private void openSidebar() {
@@ -133,13 +190,12 @@ public class Home extends AppCompatActivity {
         }
     }
 
-
-    private void showLogoutDialog(){
+    private void showLogoutDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.custom_dialog, null);
 
         AlertDialog customDialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
-                .setCancelable(false) // the user cant cancel clicking outside
+                .setCancelable(false) // the user can't cancel clicking outside
                 .create();
         if (customDialog.getWindow() != null) {
             customDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -151,14 +207,13 @@ public class Home extends AppCompatActivity {
         Button btnNo = dialogView.findViewById(R.id.btnNo);
 
         btnYes.setOnClickListener(v -> {
-            performLogout(); // calls the log out method
+            performLogout(); // calls the logout method
             customDialog.dismiss(); // Close the Dialog
         });
 
         btnNo.setOnClickListener(v -> customDialog.dismiss()); // Closes the dialog
-
-        customDialog.show();
     }
+
     private void performLogout() {
         // Redirect to Login screen
         Intent intent = new Intent(Home.this, LogIn.class);
@@ -166,5 +221,4 @@ public class Home extends AppCompatActivity {
         startActivity(intent);
         finish(); // Close the current activity
     }
-
 }
