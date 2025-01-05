@@ -64,8 +64,9 @@ public class SosContacts extends AppCompatActivity {
                     ContactsContract.CommonDataKinds.Phone.NUMBER}, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    String number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
                     if (!isContactAlreadyExists(name)) {
-                        addContactToDatabase(name, false); // Default unpinned
+                        addContactToDatabase(name, number, false); // Inclui o número do contato
                         addContactToView(name, false);
                     } else {
                         Toast.makeText(this, "This contact already exists!", Toast.LENGTH_SHORT).show();
@@ -78,9 +79,10 @@ public class SosContacts extends AppCompatActivity {
         }
     }
 
-    private void addContactToDatabase(String name, boolean isPinned) {
+    private void addContactToDatabase(String name, String number, boolean isPinned) {
         ContentValues values = new ContentValues();
         values.put("name", name);
+        values.put("number", number); // Salva o número do contato
         values.put("isPinned", isPinned ? 1 : 0);
         database.insert("contacts", null, values);
     }
@@ -114,7 +116,7 @@ public class SosContacts extends AppCompatActivity {
         ImageView dropdownButton = new ImageView(this);
         dropdownButton.setImageResource(R.drawable.t_dots);
         dropdownButton.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
-        dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name));
+        dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name, isPinned));
         contactRow.addView(dropdownButton);
 
         if (isPinned) {
@@ -130,12 +132,10 @@ public class SosContacts extends AppCompatActivity {
     private void togglePinState(ImageView starIcon, LinearLayout contactRow, String name) {
         boolean isCurrentlyPinned = (boolean) starIcon.getTag();
         if (isCurrentlyPinned) {
-            // Unpin the contact
             pinnedContactListContainer.removeView(contactRow);
             addContactToView(name, false);
             updateContactInDatabase(name, false);
         } else {
-            // Pin the contact
             if (pinnedContactListContainer.getChildCount() >= MAX_PINNED_CONTACTS) {
                 Toast.makeText(this, "You can only pin up to " + MAX_PINNED_CONTACTS + " contacts.", Toast.LENGTH_SHORT).show();
                 return;
@@ -153,7 +153,7 @@ public class SosContacts extends AppCompatActivity {
         database.update("contacts", values, "name=?", new String[]{name});
     }
 
-    private void showDropdownMenu(View anchor, LinearLayout contactRow, String name) {
+    private void showDropdownMenu(View anchor, LinearLayout contactRow, String name, boolean isPinned) {
         View dropdownMenu = getLayoutInflater().inflate(R.layout.activity_dropdown_layout, null);
 
         PopupWindow popupWindow = new PopupWindow(
@@ -170,7 +170,7 @@ public class SosContacts extends AppCompatActivity {
         TextView deleteButton = dropdownMenu.findViewById(R.id.btn_delete);
 
         editButton.setOnClickListener(v -> {
-            enableEditMode(contactRow, name);
+            enableEditMode(contactRow, name, isPinned);
             popupWindow.dismiss();
         });
 
@@ -182,7 +182,7 @@ public class SosContacts extends AppCompatActivity {
         popupWindow.showAsDropDown(anchor, -50, 0);
     }
 
-    private void enableEditMode(LinearLayout contactRow, String oldName) {
+    private void enableEditMode(LinearLayout contactRow, String oldName, boolean wasPinned) {
         contactRow.removeAllViews();
 
         EditText editText = new EditText(this);
@@ -195,26 +195,21 @@ public class SosContacts extends AppCompatActivity {
         confirmButton.setImageResource(android.R.drawable.ic_menu_save);
         confirmButton.setOnClickListener(v -> {
             String newName = editText.getText().toString();
-            updateContactInDatabase(oldName, newName);
-            addContactToView(newName, false); // Re-add contact to the list
-            contactRow.setVisibility(View.GONE);
-            updatePinnedGapVisibility();
+            updateContactInDatabase(oldName, newName, wasPinned);
+            loadContacts();
         });
         contactRow.addView(confirmButton);
 
         ImageView cancelButton = new ImageView(this);
         cancelButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
-        cancelButton.setOnClickListener(v -> {
-            addContactToView(oldName, false);
-            contactRow.setVisibility(View.GONE);
-            updatePinnedGapVisibility();
-        });
+        cancelButton.setOnClickListener(v -> loadContacts());
         contactRow.addView(cancelButton);
     }
 
-    private void updateContactInDatabase(String oldName, String newName) {
+    private void updateContactInDatabase(String oldName, String newName, boolean isPinned) {
         ContentValues values = new ContentValues();
         values.put("name", newName);
+        values.put("isPinned", isPinned ? 1 : 0);
         database.update("contacts", values, "name=?", new String[]{oldName});
     }
 
@@ -237,7 +232,7 @@ public class SosContacts extends AppCompatActivity {
         }
         pinnedCursor.close();
 
-        Cursor unpinnedCursor = database.query("contacts", null, "isPinned = ?", new String[]{"0"}, null, null, null);
+        Cursor unpinnedCursor = database.query("contacts", null, "isPinned = ?", new String[]{"0"}, null, null,null);
         while (unpinnedCursor.moveToNext()) {
             String name = unpinnedCursor.getString(unpinnedCursor.getColumnIndexOrThrow("name"));
             addContactToView(name, false);

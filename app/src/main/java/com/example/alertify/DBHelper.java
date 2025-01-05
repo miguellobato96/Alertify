@@ -32,6 +32,9 @@ public class DBHelper extends SQLiteOpenHelper {
         if (oldVersion < 3) {
             db.execSQL("ALTER TABLE contacts ADD COLUMN pinned_order INTEGER DEFAULT NULL");
         }
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE contacts ADD COLUMN number TEXT"); // Atualização para adicionar a coluna "number"
+        }
     }
 }
 
