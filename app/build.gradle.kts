@@ -32,13 +32,21 @@ android {
 }
 
 dependencies {
-
+    // AndroidX libraries
     implementation(libs.appcompat)
-    implementation(libs.material)
+    implementation(libs.material) // Material Components
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
+    // Google Play Services and Maps
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    // Testing libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.material) // Material Components
+
+    // Networking library for API calls
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
 }

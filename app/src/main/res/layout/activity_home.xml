@@ -4,38 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Home"
     android:background="@color/primary_purple"
-    android:orientation="vertical">
+    tools:context=".Home">
 
     <!-- Top Section: Map -->
-    <FrameLayout
-        android:id="@+id/mapContainer"
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.5">
+        app:layout_constraintHeight_percent="0.5" />
 
-        <!-- Placeholder for Map -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="Map Placeholder"
-            android:textColor="@color/light_orange"
-            android:background="@color/violet"
-            android:textSize="18sp" />
-    </FrameLayout>
-
+    <!-- Active Switch -->
     <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/activeSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
         android:layout_margin="8dp"
+        android:textColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -47,7 +35,7 @@
         android:columnCount="2"
         android:rowCount="2"
         android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/mapContainer"
+        app:layout_constraintTop_toBottomOf="@id/mapView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/sosSlider">
@@ -57,8 +45,6 @@
             android:id="@+id/contact_placeholder_1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_row="0"
-            android:layout_column="0"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
             android:layout_margin="4dp"
@@ -83,8 +69,6 @@
             android:id="@+id/contact_placeholder_2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_row="0"
-            android:layout_column="1"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
             android:layout_margin="4dp"
@@ -109,8 +93,6 @@
             android:id="@+id/contact_placeholder_3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_row="1"
-            android:layout_column="0"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
             android:layout_margin="4dp"
@@ -135,8 +117,6 @@
             android:id="@+id/contact_placeholder_4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_row="1"
-            android:layout_column="1"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
             android:layout_margin="4dp"
@@ -198,7 +178,7 @@
             android:layout_gravity="center" />
     </LinearLayout>
 
-    <!-- Sidebar -->
+    <!-- Sidebar Button -->
     <ImageButton
         android:id="@+id/open_settings_button"
         android:layout_width="wrap_content"
@@ -209,6 +189,7 @@
         android:layout_margin="16dp"
         android:background="?android:attr/selectableItemBackgroundBorderless" />
 
+    <!-- Sidebar Background Overlay -->
     <View
         android:id="@+id/background_overlay"
         android:layout_width="match_parent"
@@ -225,10 +206,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_alignParentEnd="true"
         android:background="@drawable/rounded_corners"
-        tools:visibility="visible"
-        android:clickable="true"
-        android:visibility="gone">
+        android:visibility="gone"
 
+        tools:visibility="visible"
+        android:clickable="true">
+
+        <!-- Sidebar Title -->
         <TextView
             android:id="@+id/settingstv"
             android:layout_width="match_parent"
@@ -241,6 +224,7 @@
             android:padding="16dp"
             android:layout_marginTop="20dp" />
 
+        <!-- Close Sidebar Button -->
         <ImageButton
             android:id="@+id/close_button"
             android:layout_width="wrap_content"
@@ -252,80 +236,63 @@
             android:layout_marginTop="45dp"
             android:layout_marginEnd="15dp" />
 
+        <!-- Sidebar Menu Buttons -->
         <Button
             android:id="@+id/btn_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Home"
             android:textColor="@color/orange"
-            android:textAlignment="textStart"
-            android:textSize="20sp"
-            android:fontFamily="@font/prompt_regular"
             android:background="@color/purple"
             android:padding="16dp"
-            android:layout_below="@+id/settingstv"
-            android:drawablePadding="8dp"
-            android:layout_alignParentStart="true" />
+            android:layout_below="@id/settingstv" />
+
         <Button
             android:id="@+id/btn_sos_contacts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="SOS Contacts"
-            android:textStyle="bold"
-            android:textAlignment="textStart"
-            android:textSize="20sp"
-            android:layout_below="@id/btn_home"
-            android:padding="16dp"
-            android:fontFamily="@font/prompt_regular"
             android:textColor="@color/dark_grey"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:padding="16dp"
+            android:layout_below="@id/btn_home" />
 
         <Button
             android:id="@+id/btn_safety_tips"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Safety Tips"
-            android:textStyle="bold"
-            android:textAlignment="textStart"
-            android:textSize="20sp"
-            android:layout_below="@id/btn_sos_contacts"
-            android:padding="16dp"
-            android:fontFamily="@font/prompt_regular"
             android:textColor="@color/dark_grey"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:padding="16dp"
+            android:layout_below="@id/btn_sos_contacts" />
+
         <Button
             android:id="@+id/btn_about_us"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="About Us"
-            android:textStyle="bold"
-            android:textAlignment="textStart"
-            android:textSize="20sp"
-            android:layout_below="@id/btn_safety_tips"
-            android:padding="16dp"
-            android:fontFamily="@font/prompt_regular"
             android:textColor="@color/dark_grey"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:padding="16dp"
+            android:layout_below="@id/btn_safety_tips" />
+
         <Button
             android:id="@+id/btn_terms_conditions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textAlignment="textStart"
-            android:text="Terms and conditions"
-            android:textSize="20sp"
-            android:layout_below="@id/btn_about_us"
-            android:padding="16dp"
-            android:layout_margin="0dp"
-            android:fontFamily="@font/prompt_regular"
+            android:text="Terms and Conditions"
             android:textColor="@color/dark_grey"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:padding="16dp"
+            android:layout_below="@id/btn_about_us" />
+
         <Button
             android:id="@+id/btn_logout"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:text="Log out"

@@ -1,5 +1,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,14 +9,15 @@
     <!-- Back Arrow -->
     <ImageButton
         android:id="@+id/back_button"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_alignParentStart="true"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:src="@drawable/close_icon"
         android:contentDescription="Back"
-        android:background="?android:attr/selectableItemBackgroundBorderless" />
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        app:tint="@color/dark_grey" />
 
     <!-- Title -->
     <TextView
@@ -25,65 +27,69 @@
         android:layout_marginTop="16dp"
         android:layout_centerHorizontal="true"
         android:text="Emergency\nContacts"
-        android:textColor="#000000"
-        android:textSize="40sp"
+        android:textColor="@color/dark_grey"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:gravity="center" />
 
     <!-- No Contacts Message -->
     <TextView
         android:id="@+id/no_contacts_message"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Não existem contactos adicionados, clique no botão do canto inferior direito para adicionar algum."
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
+        android:layout_marginHorizontal="16dp"
+        android:text="No contacts added. Tap the button below to add one."
+        android:textSize="16sp"
+        android:textStyle="italic"
+        android:textColor="@color/dark_grey"
         android:gravity="center"
         android:visibility="gone" />
 
     <!-- ScrollView for contact lists -->
     <ScrollView
+        android:id="@+id/contacts_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/emergency_contacts_title"
         android:layout_above="@id/add_contact_button"
-        android:contentDescription="List of contacts">
+        android:layout_marginTop="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp">
+            android:paddingHorizontal="16dp">
 
             <!-- Pinned Contacts Section -->
             <TextView
                 android:id="@+id/pinned_contacts_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="Pinned Contacts"
-                android:textColor="#000000"
-                android:textSize="24sp"
+                android:textColor="@color/dark_grey"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:visibility="visible" />
 
-            <!-- Gap for pinned contacts -->
             <TextView
                 android:id="@+id/pinned_contacts_gap"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:hint="No pinned contacts added...yet"
-                android:layout_marginTop="10dp"
-                android:textStyle="bold"
-                android:textSize="15sp"
-                android:layout_height="32dp" />
-
+                android:textColor="@color/dark_grey"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/pinned_contact_list_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:layout_marginTop="8dp"
                 android:visibility="visible" />
 
             <!-- Regular Contacts Section -->
@@ -91,32 +97,36 @@
                 android:id="@+id/contacts_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="Contacts"
-                android:textColor="#000000"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textColor="@color/dark_grey"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="visible" />
 
             <LinearLayout
                 android:id="@+id/contact_list_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:orientation="vertical"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
     </ScrollView>
 
     <!-- Add Contact Button -->
     <Button
         android:id="@+id/add_contact_button"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
         android:background="@drawable/add_contact"
         android:text="+"
-        android:textColor="#FFFFFF"
-        android:textSize="30sp"
+        android:textColor="@color/white"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
         android:contentDescription="Add Contact" />
+
 </RelativeLayout>

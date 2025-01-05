@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions required for location services and internet -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
@@ -15,12 +20,17 @@
         android:theme="@style/Theme.Alertify"
         tools:targetApi="31">
 
+        <!-- Meta-data for Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBonO1yU-ZwiE2v29cEGvuZYV4_uRwEyOE" />
+
         <!-- Splash Screen Activity -->
         <activity
             android:name=".SplashActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="true">
-            <!-- Set SplashActivity as Launcher Activity -->
+            <!-- Set SplashActivity as the Launcher Activity -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -41,9 +51,11 @@
         <activity
             android:name=".Home"
             android:exported="true" />
+
         <!-- SOS Contacts Activity -->
-        <activity android:name=".SosContacts"
-                  android:exported="true"/>
+        <activity
+            android:name=".SosContacts"
+            android:exported="true" />
 
     </application>
 </manifest>
