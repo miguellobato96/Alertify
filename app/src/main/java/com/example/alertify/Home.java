@@ -25,7 +25,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 
-import java.util.ArrayList;
 public class Home extends AppCompatActivity {
 
     private static final int SMS_PERMISSION_CODE = 100;
@@ -49,7 +48,6 @@ public class Home extends AppCompatActivity {
     private boolean isHomeSelected = true; // Flag to track if Home is selected
 
     private ArrayList<Contact> pinnedContacts = new ArrayList<>();
-
     private ArrayList<TextView> placeholders;
     private DBHelper dbHelper;
 
@@ -68,7 +66,6 @@ public class Home extends AppCompatActivity {
         btnAboutUs = findViewById(R.id.btn_about_us);
         btnTermsConditions = findViewById(R.id.btn_terms_conditions);
         btnLogOut = findViewById(R.id.btn_logout);
-
 
         // Initialize slider elements
         sliderButton = findViewById(R.id.sliderButton);
@@ -161,9 +158,6 @@ public class Home extends AppCompatActivity {
         Cursor cursor = database.query(
                 "contacts",
                 new String[]{"name", "number"}, // Inclui o número na consulta
-
-                new String[]{"name"},
-
                 "isPinned = ?",
                 new String[]{"1"},
                 null,
@@ -174,7 +168,6 @@ public class Home extends AppCompatActivity {
 
         // Processar contatos "pinned"
         pinnedContacts.clear(); // Limpa a lista que armazena contatos "pinned"
-
 
         // Clear placeholders and reset to "N/A"
         for (TextView placeholder : placeholders) {
@@ -195,16 +188,11 @@ public class Home extends AppCompatActivity {
                 placeholders.get(index).setText(contactName);
                 index++;
             }
-        // Populate placeholders with pinned contacts
-        int index = 0;
-        while (cursor.moveToNext() && index < placeholders.size()) {
-            String contactName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            placeholders.get(index).setText(contactName);
-            index++;
         }
 
         cursor.close();
     }
+
 
     private void openSidebar() {
         sidebarLayout.setVisibility(View.VISIBLE);
@@ -275,7 +263,6 @@ public class Home extends AppCompatActivity {
         startActivity(intent);
         finish(); // Close the current activity
     }
-
     private boolean handleSliderMovement(View view, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -399,4 +386,3 @@ public class Home extends AppCompatActivity {
 }
 
 
-}

@@ -166,17 +166,13 @@ public class SosContacts extends AppCompatActivity {
         popupWindow.setBackgroundDrawable(getDrawable(R.drawable.dropdown_background));
         popupWindow.setElevation(10);
 
-        // TextView editButton = dropdownMenu.findViewById(R.id.btn_edit);
+        TextView editButton = dropdownMenu.findViewById(R.id.btn_edit);
         TextView deleteButton = dropdownMenu.findViewById(R.id.btn_delete);
 
         editButton.setOnClickListener(v -> {
             enableEditMode(contactRow, name, isPinned);
             popupWindow.dismiss();
         });
-      //  editButton.setOnClickListener(v -> {
-      //      enableEditMode(contactRow, name, isPinned);
-      //      popupWindow.dismiss();
-      //  });
 
         deleteButton.setOnClickListener(v -> {
             deleteContact(contactRow, name);
