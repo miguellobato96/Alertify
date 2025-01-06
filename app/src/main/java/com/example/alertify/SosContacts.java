@@ -19,41 +19,51 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.alertify.database.ContactDatabaseHelper;
+
 public class SosContacts extends AppCompatActivity {
 
+    // Containers for pinned and unpinned contacts
     private LinearLayout pinnedContactListContainer;
     private LinearLayout contactListContainer;
-    private SQLiteDatabase database;
-    private static final int CONTACT_PICKER_REQUEST = 1;
-    private static final int MAX_PINNED_CONTACTS = 4;
+    private SQLiteDatabase database; // Database instance
+    private static final int CONTACT_PICKER_REQUEST = 1; // Request code for contact picker
+    private static final int MAX_PINNED_CONTACTS = 4; // Maximum number of pinned contacts
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sos_contact_list);
 
-        DBHelper dbHelper = new DBHelper(this);
-        database = dbHelper.getWritableDatabase();
+        // Initialize the database helper and get a writable database instance
+        ContactDatabaseHelper contactDatabaseHelper = new ContactDatabaseHelper(this);
+        database = contactDatabaseHelper.getWritableDatabase();
 
+        // Link UI elements
         pinnedContactListContainer = findViewById(R.id.pinned_contact_list_container);
         contactListContainer = findViewById(R.id.contact_list_container);
         Button addContactButton = findViewById(R.id.add_contact_button);
 
+        // Back button functionality
         ImageButton backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> finish());
 
+        // Set click listener for adding contacts
         addContactButton.setOnClickListener(view -> openContactsPicker());
 
+        // Load contacts from the database and update UI
         loadContacts();
         updateNoContactsMessage();
     }
 
+    // Open the contact picker to select a contact
     private void openContactsPicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         startActivityForResult(intent, CONTACT_PICKER_REQUEST);
     }
 
+    // Handle the result of the contact picker
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -66,7 +76,8 @@ public class SosContacts extends AppCompatActivity {
                     String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                     String number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
                     if (!isContactAlreadyExists(name)) {
-                        addContactToDatabase(name, number, false); // Inclui o número do contato
+                        // Add contact to database and update UI
+                        addContactToDatabase(name, number, false);
                         addContactToView(name, false);
                     } else {
                         Toast.makeText(this, "This contact already exists!", Toast.LENGTH_SHORT).show();
@@ -79,33 +90,38 @@ public class SosContacts extends AppCompatActivity {
         }
     }
 
+    // Add a contact to the database
     private void addContactToDatabase(String name, String number, boolean isPinned) {
         ContentValues values = new ContentValues();
         values.put("name", name);
-        values.put("number", number); // Salva o número do contato
+        values.put("number", number);
         values.put("isPinned", isPinned ? 1 : 0);
         database.insert("contacts", null, values);
     }
 
+    // Check if a contact already exists in the database
     private boolean isContactAlreadyExists(String name) {
         try (Cursor cursor = database.query("contacts", null, "name=?", new String[]{name}, null, null, null)) {
             return cursor.getCount() > 0;
         }
     }
 
+    // Add a contact to the UI
     private void addContactToView(String name, boolean isPinned) {
         LinearLayout contactRow = new LinearLayout(this);
         contactRow.setOrientation(LinearLayout.HORIZONTAL);
         contactRow.setPadding(16, 16, 16, 16);
         contactRow.setBackgroundColor(Color.TRANSPARENT);
 
+        // Star icon for pinning/unpinning
         ImageView starIcon = new ImageView(this);
         starIcon.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
         starIcon.setImageResource(isPinned ? R.drawable.starwbg : R.drawable.starnobg);
-        starIcon.setTag(isPinned); // Store pin state
+        starIcon.setTag(isPinned);
         starIcon.setOnClickListener(v -> togglePinState(starIcon, contactRow, name));
         contactRow.addView(starIcon);
 
+        // Contact name
         TextView contactText = new TextView(this);
         contactText.setText(name);
         contactText.setTextSize(18);
@@ -113,12 +129,14 @@ public class SosContacts extends AppCompatActivity {
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
         contactRow.addView(contactText);
 
+        // Dropdown button for edit/delete options
         ImageView dropdownButton = new ImageView(this);
         dropdownButton.setImageResource(R.drawable.t_dots);
         dropdownButton.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
         dropdownButton.setOnClickListener(v -> showDropdownMenu(dropdownButton, contactRow, name, isPinned));
         contactRow.addView(dropdownButton);
 
+        // Add to appropriate container (pinned or unpinned)
         if (isPinned) {
             pinnedContactListContainer.setVisibility(View.VISIBLE);
             pinnedContactListContainer.addView(contactRow);
@@ -129,6 +147,7 @@ public class SosContacts extends AppCompatActivity {
         updatePinnedGapVisibility();
     }
 
+    // Toggle the pin state of a contact
     private void togglePinState(ImageView starIcon, LinearLayout contactRow, String name) {
         boolean isCurrentlyPinned = (boolean) starIcon.getTag();
         if (isCurrentlyPinned) {
@@ -147,12 +166,14 @@ public class SosContacts extends AppCompatActivity {
         starIcon.setTag(!isCurrentlyPinned);
     }
 
+    // Update a contact's pin state in the database
     private void updateContactInDatabase(String name, boolean isPinned) {
         ContentValues values = new ContentValues();
         values.put("isPinned", isPinned ? 1 : 0);
         database.update("contacts", values, "name=?", new String[]{name});
     }
 
+    // Show dropdown menu for edit/delete options
     private void showDropdownMenu(View anchor, LinearLayout contactRow, String name, boolean isPinned) {
         View dropdownMenu = getLayoutInflater().inflate(R.layout.activity_dropdown_layout, null);
 
@@ -182,6 +203,7 @@ public class SosContacts extends AppCompatActivity {
         popupWindow.showAsDropDown(anchor, -50, 0);
     }
 
+    // Enable edit mode for a contact
     private void enableEditMode(LinearLayout contactRow, String oldName, boolean wasPinned) {
         contactRow.removeAllViews();
 
@@ -206,6 +228,7 @@ public class SosContacts extends AppCompatActivity {
         contactRow.addView(cancelButton);
     }
 
+    // Update a contact's name in the database
     private void updateContactInDatabase(String oldName, String newName, boolean isPinned) {
         ContentValues values = new ContentValues();
         values.put("name", newName);
@@ -213,6 +236,7 @@ public class SosContacts extends AppCompatActivity {
         database.update("contacts", values, "name=?", new String[]{oldName});
     }
 
+    // Delete a contact from the database and UI
     private void deleteContact(LinearLayout contactRow, String name) {
         database.delete("contacts", "name=?", new String[]{name});
         contactListContainer.removeView(contactRow);
@@ -221,6 +245,7 @@ public class SosContacts extends AppCompatActivity {
         updatePinnedGapVisibility();
     }
 
+    // Load contacts from the database into the UI
     private void loadContacts() {
         pinnedContactListContainer.removeAllViews();
         contactListContainer.removeAllViews();
@@ -232,7 +257,7 @@ public class SosContacts extends AppCompatActivity {
         }
         pinnedCursor.close();
 
-        Cursor unpinnedCursor = database.query("contacts", null, "isPinned = ?", new String[]{"0"}, null, null,null);
+        Cursor unpinnedCursor = database.query("contacts", null, "isPinned = ?", new String[]{"0"}, null, null, null);
         while (unpinnedCursor.moveToNext()) {
             String name = unpinnedCursor.getString(unpinnedCursor.getColumnIndexOrThrow("name"));
             addContactToView(name, false);
@@ -243,12 +268,14 @@ public class SosContacts extends AppCompatActivity {
         updatePinnedGapVisibility();
     }
 
+    // Update the message displayed when there are no contacts
     private void updateNoContactsMessage() {
         TextView noContactsMessage = findViewById(R.id.no_contacts_message);
         boolean noContacts = contactListContainer.getChildCount() == 0 && pinnedContactListContainer.getChildCount() == 0;
         noContactsMessage.setVisibility(noContacts ? View.VISIBLE : View.GONE);
     }
 
+    // Update the visibility of the gap between pinned and unpinned contacts
     private void updatePinnedGapVisibility() {
         TextView pinnedContactsGap = findViewById(R.id.pinned_contacts_gap);
         boolean hasPinnedContacts = pinnedContactListContainer.getChildCount() > 0;
@@ -257,7 +284,7 @@ public class SosContacts extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        database.close();
+        database.close(); // Close the database when the activity is destroyed
         super.onDestroy();
     }
 }

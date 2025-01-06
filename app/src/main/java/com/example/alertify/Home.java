@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.alertify.database.ContactDatabaseHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -30,13 +31,8 @@ import android.view.MotionEvent;
 import java.util.ArrayList;
 
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.telephony.SmsManager;
 import android.widget.Toast;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -67,7 +63,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private ArrayList<TextView> placeholders;
 
     // Database helper for retrieving contacts
-    private DBHelper dbHelper;
+    private ContactDatabaseHelper contactDatabaseHelper;
 
     // Google Map variables
     private MapView mapView;
@@ -113,7 +109,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         placeholders.add(findViewById(R.id.contact_text_4));
 
         // Initialize database helper
-        dbHelper = new DBHelper(this);
+        contactDatabaseHelper = new ContactDatabaseHelper(this);
 
         // Load pinned contacts from the database
         loadPinnedContacts();
@@ -256,7 +252,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     private void loadPinnedContacts() {
-        SQLiteDatabase database = dbHelper.getReadableDatabase();
+        SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();
 
         // Query pinned contacts, ordered by pinned_order
         Cursor cursor = database.query(
@@ -409,7 +405,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             return;
         }
 
-        SQLiteDatabase database = dbHelper.getReadableDatabase();
+        SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();
         Cursor cursor = database.query(
                 "contacts",
                 new String[]{"name", "number"},

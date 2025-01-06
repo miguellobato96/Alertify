@@ -9,21 +9,23 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.alertify.database.UserDatabaseHelper;
+
 public class SignUp extends AppCompatActivity {
 
     // UI components
     private EditText etFullName, etEmail, etPassword, etRepeatPassword; // Input fields
     private Button btnSignUp; // Sign Up button
     private TextView tvLogin; // Link to navigate to Login screen
-    private DatabaseHelper dbHelper; // Database helper for database operations
+    private UserDatabaseHelper dbHelper; // Database helper for database operations
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up); // Link to the Sign Up layout
 
-        // Initialize DatabaseHelper
-        dbHelper = new DatabaseHelper(this);
+        // Initialize UserDatabaseHelper
+        dbHelper = new UserDatabaseHelper(this);
 
         // Link UI components using their IDs
         etFullName = findViewById(R.id.etFullName);
