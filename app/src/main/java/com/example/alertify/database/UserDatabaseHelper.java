@@ -44,6 +44,14 @@ public class UserDatabaseHelper extends SQLiteOpenHelper {
         // Empty implementation since versioning is not required
     }
 
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Drop the table and recreate it to handle database downgrades
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        onCreate(db);
+    }
+
+
     // Method to insert a new user into the database
     public boolean addUser(String fullName, String email, String password) {
         SQLiteDatabase db = this.getWritableDatabase();

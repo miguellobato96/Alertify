@@ -29,4 +29,12 @@ public class ContactDatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This method is now empty because database versioning is not needed
     }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Drop the table and recreate it to handle database downgrades
+        db.execSQL("DROP TABLE IF EXISTS contacts");
+        onCreate(db);
+    }
+
 }
