@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -110,7 +112,8 @@ public class SosContacts extends AppCompatActivity {
     private void addContactToView(String name, boolean isPinned) {
         LinearLayout contactRow = new LinearLayout(this);
         contactRow.setOrientation(LinearLayout.HORIZONTAL);
-        contactRow.setPadding(16, 16, 16, 16);
+        contactRow.setGravity(Gravity.CENTER_VERTICAL);
+        contactRow.setPadding(16, 8, 16, 8);
         contactRow.setBackgroundColor(Color.TRANSPARENT);
 
         // Star icon for pinning/unpinning

@@ -1,6 +1,7 @@
 package com.example.alertify;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -47,7 +48,8 @@ public class LogIn extends AppCompatActivity {
             boolean isValid = dbHelper.checkUser(email, password);
 
             if (isValid) {
-                // If valid, display success message and navigate to Home screen
+                // If valid, save login state and navigate to Home screen
+                saveLoginState(); // Save the login state in SharedPreferences
                 Toast.makeText(LogIn.this, "Login successful", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(LogIn.this, Home.class);
                 startActivity(intent);
@@ -63,5 +65,13 @@ public class LogIn extends AppCompatActivity {
             Intent intent = new Intent(LogIn.this, SignUp.class);
             startActivity(intent); // Open the Sign Up activity
         });
+    }
+
+    // Save login state in SharedPreferences
+    private void saveLoginState() {
+        SharedPreferences sharedPreferences = getSharedPreferences("AlertifyPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isLoggedIn", true); // Set login state
+        editor.apply(); // Apply changes
     }
 }

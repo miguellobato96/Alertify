@@ -3,6 +3,7 @@ package com.example.alertify;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -30,13 +31,13 @@ import com.google.android.gms.location.LocationServices;
 import android.view.MotionEvent;
 import java.util.ArrayList;
 
-
 import android.telephony.SmsManager;
 import android.widget.Toast;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int SMS_PERMISSION_CODE = 100;
+
     // Sidebar layout and buttons
     private View sidebarLayout;
     private View backgroundOverlay;
@@ -50,16 +51,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private Button btnTermsConditions;
     private Button btnLogOut;
 
+    // Slider elements for SOS functionality
     private FrameLayout sliderButton;
     private TextView sliderInstruction;
     private boolean isSliderActive = false;
 
-    private boolean isHomeSelected = true; // Flag to track if Home is selected
+    private boolean isHomeSelected = true; // Flag to track if the "Home" button is selected
 
-    private ArrayList<Contact> pinnedContacts = new ArrayList<>();
+    private ArrayList<Contact> pinnedContacts = new ArrayList<>(); // List of pinned contacts
 
-    // Contact placeholders
-
+    // Placeholders for pinned contacts in the UI
     private ArrayList<TextView> placeholders;
 
     // Database helper for retrieving contacts
@@ -69,7 +70,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private MapView mapView;
     private GoogleMap googleMap;
 
-    // Location client
+    // Location client for accessing the user's location
     private FusedLocationProviderClient fusedLocationClient;
 
     @Override
@@ -77,13 +78,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-
         // Check and request SMS permissions
         checkAndRequestPermissions();
 
         // Initialize location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
 
         // Initialize sidebar buttons
         btnHome = findViewById(R.id.btn_home);
@@ -93,15 +92,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         btnTermsConditions = findViewById(R.id.btn_terms_conditions);
         btnLogOut = findViewById(R.id.btn_logout);
 
-
-        // Initialize slider elements
+        // Initialize slider elements for SOS activation
         sliderButton = findViewById(R.id.sliderButton);
         sliderInstruction = findViewById(R.id.sliderInstruction);
 
         sliderButton.setOnTouchListener(this::handleSliderMovement);
 
-        // Initialize placeholders for pinned contacts
-
+        // Initialize placeholders for pinned contacts in the UI
         placeholders = new ArrayList<>();
         placeholders.add(findViewById(R.id.contact_text_1));
         placeholders.add(findViewById(R.id.contact_text_2));
@@ -170,6 +167,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         checkLocationPermission();
     }
 
+    // Checks if location permissions are granted and requests them if not
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -187,6 +185,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
+    // Sets up the Google Map with the user's location
     private void setupMap() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -199,12 +198,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             if (location != null) {
                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-                googleMap.addMarker(new MarkerOptions().position(userLocation).title("Você está aqui"));
+                googleMap.addMarker(new MarkerOptions().position(userLocation).title("You are here"));
             }
         });
     }
 
-@Override
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -251,13 +250,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
+    // Loads pinned contacts from the database and updates the UI
     private void loadPinnedContacts() {
         SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();
 
         // Query pinned contacts, ordered by pinned_order
         Cursor cursor = database.query(
                 "contacts",
-                new String[]{"name", "number"}, // Inclui o número na consulta
+                new String[]{"name", "number"}, // Include the phone number in the query
                 "isPinned = ?",
                 new String[]{"1"},
                 null,
@@ -265,26 +265,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 "pinned_order ASC"
         );
 
-        // Processar contatos "pinned"
-        pinnedContacts.clear(); // Limpa a lista que armazena contatos "pinned"
+        // Clear the list of pinned contacts
+        pinnedContacts.clear();
 
-        // Clear placeholders and reset to "N/A"
-
+        // Reset placeholders to "N/A"
         for (TextView placeholder : placeholders) {
             placeholder.setText("N/A");
         }
-
 
         // Populate placeholders with contact names
         int index = 0;
         while (cursor.moveToNext()) {
             String contactName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow("number")); // Recupera o número
+            String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow("number"));
 
-            // Adiciona o contato à lista de "pinned contacts"
+            // Add the contact to the pinned contacts list
             pinnedContacts.add(new Contact(contactName, contactNumber));
 
-            // Atualiza os placeholders até o limite máximo
+            // Update placeholders up to the maximum limit
             if (index < placeholders.size()) {
                 placeholders.get(index).setText(contactName);
                 index++;
@@ -294,7 +292,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         cursor.close();
     }
 
-
+    // Opens the sidebar with an animation
     private void openSidebar() {
         sidebarLayout.setVisibility(View.VISIBLE);
         backgroundOverlay.setVisibility(View.VISIBLE);
@@ -302,6 +300,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         sidebarLayout.animate().translationX(0).setDuration(300).start();
     }
 
+    // Closes the sidebar with an animation
     private void closeSidebar() {
         sidebarLayout.animate()
                 .translationX(sidebarLayout.getWidth())
@@ -312,6 +311,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 }).start();
     }
 
+    // Updates the styles of the selected sidebar button
     private void setSelectedButton(Button selectedButton) {
         resetButtonStyles();
 
@@ -322,6 +322,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         isHomeSelected = selectedButton == btnHome;
     }
 
+    // Resets the styles of all sidebar buttons to default
     private void resetButtonStyles() {
         Button[] buttons = {btnHome, btnSosContacts, btnSafetyTips, btnAboutUs, btnTermsConditions};
         for (Button button : buttons) {
@@ -330,6 +331,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
+    // Shows a logout confirmation dialog
     private void showLogoutDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.custom_dialog, null);
 
@@ -347,21 +349,32 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         Button btnYes = dialogView.findViewById(R.id.btnYes);
         Button btnNo = dialogView.findViewById(R.id.btnNo);
 
+        // Confirm logout
         btnYes.setOnClickListener(v -> {
             performLogout();
             customDialog.dismiss();
         });
 
+        // Cancel logout
         btnNo.setOnClickListener(v -> customDialog.dismiss());
     }
 
+    // Logs the user out and redirects to the login screen
     private void performLogout() {
+        // Reset the logged-in state in SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("AlertifyPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isLoggedIn", false); // Set login state to false
+        editor.apply(); // Apply changes
+
+        // Redirect to the LogIn screen
         Intent intent = new Intent(Home.this, LogIn.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        finish();
+        finish(); // Finish the current activity
     }
 
+    // Handles slider movement for SOS activation
     private boolean handleSliderMovement(View view, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -389,16 +402,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         return false;
     }
 
+    // Locks the slider at the end position and triggers SOS
     private void lockSliderAtEnd() {
         sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());
-        sliderInstruction.setText("Activated");
+        sliderInstruction.setText("Alert sent!");
         isSliderActive = true;
 
         // Send SOS message
         sendSosMessage();
     }
+
+    // Sends an SOS message to pinned contacts
     private void sendSosMessage() {
-        // Verificar permissão antes de enviar mensagens
+        // Check for SMS permission before sending messages
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "SMS permission not granted. Cannot send SOS.", Toast.LENGTH_SHORT).show();
@@ -421,7 +437,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
             String number = cursor.getString(cursor.getColumnIndexOrThrow("number"));
 
-            // Validar se o número é válido antes de tentar enviar a mensagem
+            // Validate if the number is valid before attempting to send a message
             if (number == null || number.isEmpty()) {
                 Toast.makeText(this, "Contact " + name + " has an invalid number.", Toast.LENGTH_SHORT).show();
                 continue;
@@ -443,7 +459,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
-
+    // Checks and requests SMS permissions if not already granted
     private void checkAndRequestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -463,6 +479,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         }
     }
+
+    // Contact class to store information about contacts
     public class Contact {
         private String name;
         private String number;
@@ -480,10 +498,4 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             return number;
         }
     }
-
-
 }
-
-
-
-
