@@ -7,6 +7,9 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -28,11 +31,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
-import android.view.MotionEvent;
-import java.util.ArrayList;
-
 import android.telephony.SmsManager;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -78,11 +80,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Check and request SMS permissions
+        // Request permissions (combined for location and SMS)
         checkAndRequestPermissions();
 
         // Initialize location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Initialize the MapView
+        mapView = findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
 
         // Initialize sidebar buttons
         btnHome = findViewById(R.id.btn_home);
@@ -105,29 +112,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         placeholders.add(findViewById(R.id.contact_text_3));
         placeholders.add(findViewById(R.id.contact_text_4));
 
-        // Initialize database helper
+        // Initialize database helper for contacts
         contactDatabaseHelper = new ContactDatabaseHelper(this);
 
         // Load pinned contacts from the database
         loadPinnedContacts();
 
-        // Initialize Google Map
-        mapView = findViewById(R.id.mapView);
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this); // Use "this" to implement OnMapReadyCallback
-
-        // Sidebar elements
+        // Initialize sidebar layout and elements
         sidebarLayout = findViewById(R.id.sidebar_layout);
         backgroundOverlay = findViewById(R.id.background_overlay);
         ImageButton openSettingsButton = findViewById(R.id.open_settings_button);
 
-        // Sidebar button listeners
+        // Set listeners for sidebar buttons
         openSettingsButton.setOnClickListener(v -> openSidebar());
         backgroundOverlay.setOnClickListener(v -> closeSidebar());
         closeButton = findViewById(R.id.close_button);
         closeButton.setOnClickListener(v -> closeSidebar());
 
-        // Sidebar button actions
+        // Set actions for sidebar menu buttons
         btnHome.setOnClickListener(v -> {
             if (isHomeSelected) {
                 closeSidebar();
@@ -162,18 +164,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         });
 
         btnLogOut.setOnClickListener(v -> showLogoutDialog());
-
-        // Request location permissions
-        checkLocationPermission();
     }
+
 
     // Checks if location permissions are granted and requests them if not
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // Requests perms
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
+            // Update map
+            setupMap();
         }
     }
+
 
     @Override
     public void onMapReady(GoogleMap map) {
@@ -402,14 +408,79 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         return false;
     }
 
-    // Locks the slider at the end position and triggers SOS
+    // Locks the slider at the end position and starts the countdown
     private void lockSliderAtEnd() {
         sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());
-        sliderInstruction.setText("Alert sent!");
+        sliderInstruction.setText("Sending SOS in 5...");
         isSliderActive = true;
 
-        // Send SOS message
-        sendSosMessage();
+        // Start countdown
+        startCountdown(5); // 5 seconds countdown
+    }
+
+    // Start a countdown with the ability to cancel
+    private void startCountdown(int seconds) {
+        Handler handler = new Handler();
+        Runnable countdownRunnable = new Runnable() {
+            int timeLeft = seconds;
+
+            @Override
+            public void run() {
+                if (timeLeft > 0) {
+                    sliderInstruction.setText("Sending SOS in " + timeLeft + "...");
+                    timeLeft--;
+                    handler.postDelayed(this, 1000); // Continue countdown every second
+                } else {
+                    // Send SOS when countdown finishes
+                    sendSosMessage();
+                    resetSliderWithDelay(2000); // Reset slider after 2 seconds
+                }
+            }
+        };
+
+        // Add cancel button functionality
+        addCancelButton(handler, countdownRunnable);
+
+        // Start the countdown
+        handler.post(countdownRunnable);
+    }
+
+    // Add a cancel button to stop the countdown
+    private void addCancelButton(Handler handler, Runnable countdownRunnable) {
+        Button cancelButton = new Button(this);
+        cancelButton.setText("Cancel");
+        cancelButton.setBackgroundColor(ContextCompat.getColor(this, R.color.orange));
+        cancelButton.setTextColor(ContextCompat.getColor(this, R.color.white));
+        cancelButton.setPadding(16, 8, 16, 8);
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        params.bottomMargin = 100;
+        cancelButton.setLayoutParams(params);
+
+        // Add the button to the layout
+        FrameLayout rootLayout = findViewById(android.R.id.content);
+        rootLayout.addView(cancelButton);
+
+        cancelButton.setOnClickListener(v -> {
+            // Cancel the countdown
+            handler.removeCallbacks(countdownRunnable);
+            sliderInstruction.setText("Cancelled");
+            resetSliderWithDelay(1000); // Reset slider after 1 second
+            rootLayout.removeView(cancelButton); // Remove the button
+        });
+    }
+
+    // Reset the slider to its initial position with a delay
+    private void resetSliderWithDelay(int delay) {
+        new Handler().postDelayed(() -> {
+            sliderButton.animate().translationX(0).setDuration(200).start();
+            sliderInstruction.setText("Slide to Send SOS");
+            isSliderActive = false;
+        }, delay);
     }
 
     // Sends an SOS message to pinned contacts
@@ -461,24 +532,61 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     // Checks and requests SMS permissions if not already granted
     private void checkAndRequestPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.SEND_SMS}, SMS_PERMISSION_CODE);
+        // List of permissions to request
+        String[] permissions = {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.SEND_SMS
+        };
+
+        // Check if any of the permissions are not granted
+        ArrayList<String> permissionsToRequest = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(permission);
+            }
+        }
+
+        // Request all necessary permissions
+        if (!permissionsToRequest.isEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toArray(new String[0]), 1);
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == SMS_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "SMS permission granted", Toast.LENGTH_SHORT).show();
+
+        if (requestCode == 1) {
+            boolean locationGranted = false;
+            boolean smsGranted = false;
+
+            for (int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                        permissions[i].equals(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    locationGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                }
+                if (permissions[i].equals(Manifest.permission.SEND_SMS)) {
+                    smsGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                }
+            }
+
+            // Handle location permission
+            if (locationGranted) {
+                setupMap();
             } else {
-                Toast.makeText(this, "SMS permission denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Location permission is required for maps.", Toast.LENGTH_SHORT).show();
+            }
+
+            // Handle SMS permission
+            if (!smsGranted) {
+                Toast.makeText(this, "SMS permission is required to send alerts.", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
+
 
     // Contact class to store information about contacts
     public class Contact {
