@@ -276,6 +276,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         // Reset placeholders to "N/A"
         for (TextView placeholder : placeholders) {
             placeholder.setText("N/A");
+            placeholder.setOnClickListener(null); // Remove any previous click listener
         }
 
         // Populate placeholders with contact names
@@ -289,13 +290,40 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
             // Update placeholders up to the maximum limit
             if (index < placeholders.size()) {
-                placeholders.get(index).setText(contactName);
+                TextView placeholder = placeholders.get(index);
+                placeholder.setText(contactName);
+
+                // Add click listener to send SMS
+                placeholder.setOnClickListener(v -> sendSafeMessage(contactName, contactNumber));
+
                 index++;
             }
         }
 
         cursor.close();
     }
+
+    // Sends a "safe message" to a specific contact
+    private void sendSafeMessage(String contactName, String contactNumber) {
+        // Check for SMS permission before sending the message
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "SMS permission not granted. Cannot send the message.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            String message = "I don't feel safe, please keep an eye on me!";
+            smsManager.sendTextMessage(contactNumber, null, message, null, null);
+
+            Toast.makeText(this, "Message sent to " + contactName, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to send message to " + contactName, Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     // Opens the sidebar with an animation
     private void openSidebar() {
