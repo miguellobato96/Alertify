@@ -1,6 +1,7 @@
 package com.example.alertify;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -8,6 +9,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.telephony.SmsManager;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -276,10 +279,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         // Reset placeholders to "N/A"
         for (TextView placeholder : placeholders) {
             placeholder.setText("N/A");
-            placeholder.setOnClickListener(null); // Remove any previous click listener
+            placeholder.setOnClickListener(null); // Clear any existing click listeners
         }
 
-        // Populate placeholders with contact names
+        // Populate placeholders with contact names and set click listeners
         int index = 0;
         while (cursor.moveToNext()) {
             String contactName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
@@ -293,15 +296,34 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 TextView placeholder = placeholders.get(index);
                 placeholder.setText(contactName);
 
-                // Add click listener to send SMS
-                placeholder.setOnClickListener(v -> sendSafeMessage(contactName, contactNumber));
+                // Set click listener for the placeholder with feedback
+                placeholder.setOnClickListener(v -> {
+                    // Visual feedback: Change the placeholder's background color temporarily
+                    placeholder.setBackgroundResource(R.color.orange); // Change the entire background of the placeholder
+
+                    // Reset the background color after a short delay
+                    new Handler().postDelayed(() -> {
+                        placeholder.setBackgroundResource(R.color.light_purple); // Reset to the default color
+                    }, 200); // 200ms delay for visual effect
+
+                    // Add vibration feedback
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    if (vibrator != null && vibrator.hasVibrator()) {
+                        vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)); // 100ms vibration
+                    }
+
+                    // Send the safe message
+                    sendSafeMessage(contactName, contactNumber);
+                });
 
                 index++;
             }
         }
 
+
         cursor.close();
     }
+
 
     // Sends a "safe message" to a specific contact
     private void sendSafeMessage(String contactName, String contactNumber) {
