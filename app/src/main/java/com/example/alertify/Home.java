@@ -2,12 +2,13 @@ package com.example.alertify;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
+import android.telephony.SmsManager;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,17 +24,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.alertify.database.ContactDatabaseHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-
-import android.telephony.SmsManager;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -439,14 +438,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         };
 
         // Add cancel button functionality
-        addCancelButton(handler, countdownRunnable);
+        addCancelButton(handler, countdownRunnable, seconds);
 
         // Start the countdown
         handler.post(countdownRunnable);
     }
 
     // Add a cancel button to stop the countdown
-    private void addCancelButton(Handler handler, Runnable countdownRunnable) {
+    private void addCancelButton(Handler handler, Runnable countdownRunnable, int seconds) {
         Button cancelButton = new Button(this);
         cancelButton.setText("Cancel");
         cancelButton.setBackgroundColor(ContextCompat.getColor(this, R.color.orange));
@@ -472,6 +471,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             resetSliderWithDelay(1000); // Reset slider after 1 second
             rootLayout.removeView(cancelButton); // Remove the button
         });
+
+        // Automatically remove the cancel button after the countdown finishes
+        new Handler().postDelayed(() -> {
+            if (rootLayout.indexOfChild(cancelButton) != -1) {
+                rootLayout.removeView(cancelButton); // Remove the button if it still exists
+            }
+        }, (seconds + 2) * 1000L); // Buffer to ensure button removal after the countdown
     }
 
     // Reset the slider to its initial position with a delay
