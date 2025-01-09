@@ -26,7 +26,6 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/prompt_regular"
         android:layout_marginTop="16dp"
-
         android:layout_centerHorizontal="true"
         android:text="Emergency\nContacts"
         android:textColor="@color/dark_grey"
