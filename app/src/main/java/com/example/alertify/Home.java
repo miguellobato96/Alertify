@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -326,25 +327,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                     // Send the safe message
                     sendSafeMessage(contactName, contactNumber);
                 });
-
                 index++;
             }
         }
-
-
         cursor.close();
     }
 
-    private void fetchNearbyPlaces(double latitude, double longitude) {
-        String apiKey = "YOUR_GOOGLE_API_KEY"; // Replace with your actual API key
+    private void fetchNearbyPlaces(double latitude, double longitude) throws PackageManager.NameNotFoundException {
+        ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+        String apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY");
+
         int radius = 1000; // Radius in meters
 
         // Google Places API URL
         String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
                 "?location=" + latitude + "," + longitude +
                 "&radius=" + radius +
-                //"&type=restaurant|bar|cafe|store|establishment" + // Add more types here
-                //"&opennow=true" +
+                "&type=restaurant|bar|cafe|store|establishment" + // Add more types here
+                "&opennow=true" +
                 "&key=" + apiKey;
 
         // Make a network request
@@ -421,50 +421,55 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private void showPathToDestination(LatLng destination) {
         if (googleMap == null) return;
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return; // Permissions not granted, exit the method
         }
+
         fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
             if (location != null) {
                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-                // Draw a route from userLocation to destination
-                String url = "https://maps.googleapis.com/maps/api/directions/json" +
-                        "?origin=" + userLocation.latitude + "," + userLocation.longitude +
-                        "&destination=" + destination.latitude + "," + destination.longitude +
-                        "&key=YOUR_GOOGLE_API_KEY";
+                try {
+                    // Retrieve the API key from the AndroidManifest
+                    ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+                    String apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY");
 
-                new Thread(() -> {
-                    try {
-                        URL apiUrl = new URL(url);
-                        HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
-                        connection.setRequestMethod("GET");
+                    // Build the Google Directions API URL
+                    String url = "https://maps.googleapis.com/maps/api/directions/json" +
+                            "?origin=" + userLocation.latitude + "," + userLocation.longitude +
+                            "&destination=" + destination.latitude + "," + destination.longitude +
+                            "&key=" + apiKey;
 
-                        InputStream inputStream = connection.getInputStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                        StringBuilder response = new StringBuilder();
-                        String line;
+                    // Execute the HTTP request on a separate thread
+                    new Thread(() -> {
+                        try {
+                            URL apiUrl = new URL(url);
+                            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
+                            connection.setRequestMethod("GET");
 
-                        while ((line = reader.readLine()) != null) {
-                            response.append(line);
+                            InputStream inputStream = connection.getInputStream();
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                            StringBuilder response = new StringBuilder();
+                            String line;
+
+                            while ((line = reader.readLine()) != null) {
+                                response.append(line);
+                            }
+
+                            reader.close();
+                            drawRouteOnMap(response.toString());
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-
-                        reader.close();
-                        drawRouteOnMap(response.toString());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+                    }).start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
+
 
     private void drawRouteOnMap(String jsonResponse) {
         try {
@@ -528,7 +533,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 Toast.makeText(this, "Monitoring request sent.", Toast.LENGTH_SHORT).show();
 
                 // Trigger the Map functionality to find nearby safe places
-                fetchNearbyPlaces(latitude, longitude);
+                try {
+                    fetchNearbyPlaces(latitude, longitude);
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 Toast.makeText(this, "Location not available. Cannot send monitoring request.", Toast.LENGTH_SHORT).show();
             }
@@ -771,14 +780,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 Toast.makeText(this, "SOS sent with location!", Toast.LENGTH_SHORT).show();
 
                 // Trigger the Map functionality to find nearby safe places
-                fetchNearbyPlaces(latitude, longitude);
+                try {
+                    fetchNearbyPlaces(latitude, longitude);
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 Toast.makeText(this, "Location not available. SOS sent without location.", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
-
 
     // Checks and requests SMS permissions if not already granted
     private void checkAndRequestPermissions() {
@@ -802,7 +813,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             ActivityCompat.requestPermissions(this, permissionsToRequest.toArray(new String[0]), 1);
         }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -835,8 +845,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         }
     }
-
-
 
     // Contact class to store information about contacts
     public class Contact {
