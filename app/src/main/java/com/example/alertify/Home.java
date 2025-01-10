@@ -424,9 +424,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
         // Redirect to the LogIn screen
         Intent intent = new Intent(Home.this, LogIn.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Fecha todas as atividades no topo da pilha e inicia a nova atividade como nova tarefa no sistema.
         startActivity(intent);
-        finish(); // Finish the current activity
+        finish(); // Finish the current activity ( Home )
     }
 
     // Handles slider movement for SOS activation
@@ -435,22 +435,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             case MotionEvent.ACTION_DOWN:
                 return true;
             case MotionEvent.ACTION_MOVE:
-                float x = event.getRawX();
-                float parentStart = sliderInstruction.getX();
-                float parentEnd = parentStart + sliderInstruction.getWidth();
-                float maxTranslation = sliderInstruction.getWidth() - sliderButton.getWidth();
+                float x = event.getRawX(); //get actual position of the slider
+                float parentStart = sliderInstruction.getX(); //Define start of container
+                float parentEnd = parentStart + sliderInstruction.getWidth(); //Define end of container
+                float maxTranslation = sliderInstruction.getWidth() - sliderButton.getWidth(); //calcultes the max movement of the button.
 
                 if (x >= parentStart && x <= parentEnd) {
-                    float translationX = x - parentStart - sliderButton.getWidth() / 2;
-                    sliderButton.setTranslationX(Math.min(Math.max(translationX, 0), maxTranslation));
+                    float translationX = x - parentStart - sliderButton.getWidth() / 2; //Calculate the new horizontal position by the touch.
+                    sliderButton.setTranslationX(Math.min(Math.max(translationX, 0), maxTranslation)); // Works as guarantee that the button will not leave the container
                 }
                 return true;
-            case MotionEvent.ACTION_UP:
-                float finalPosition = sliderButton.getTranslationX() + sliderButton.getWidth();
-                if (finalPosition >= sliderInstruction.getWidth() * 0.85) {
-                    lockSliderAtEnd();
+            case MotionEvent.ACTION_UP: //Detects the button final's touch
+                float finalPosition = sliderButton.getTranslationX() + sliderButton.getWidth(); //Calculate's the button position + his width.
+                if (finalPosition >= sliderInstruction.getWidth() * 0.85) {            //confirms if the button is atleast 85% before the container ends
+                    lockSliderAtEnd();                                                  // if that happens the slider is blocked at the end
                 } else {
-                    sliderButton.animate().translationX(0).setDuration(200).start();
+                    sliderButton.animate().translationX(0).setDuration(200).start(); //if not the button will go back to the initial position
                 }
                 return true;
         }
@@ -459,9 +459,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     // Locks the slider at the end position and starts the countdown
     private void lockSliderAtEnd() {
-        sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());
-        sliderInstruction.setText("Sending SOS in 5...");
-        isSliderActive = true;
+        sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());  //block the slider at the end
+        sliderInstruction.setText("Sending SOS in 5...");                               //update's the slider text
+        isSliderActive = true;                                                          //activates the slider
 
         // Start countdown
         startCountdown(5); // 5 seconds countdown
@@ -542,13 +542,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     // Sends an SOS message to pinned contacts
     private void sendSosMessage() {
         // Check for SMS permission before sending messages
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)      // before sending the messages verifies the permissions
+                != PackageManager.PERMISSION_GRANTED) {                                         //if not the method is canceled
             Toast.makeText(this, "SMS permission not granted. Cannot send SOS.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();
+        SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();   //Execute a query to find the contacts where column isPinned = 1.
         Cursor cursor = database.query(
                 "contacts",
                 new String[]{"name", "number"},
@@ -557,10 +557,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 null, null, "pinned_order ASC"
         );
 
-        SmsManager smsManager = SmsManager.getDefault();
+        SmsManager smsManager = SmsManager.getDefault();                        //uses the SMS manager to send the message
         boolean success = false;
 
-        while (cursor.moveToNext()) {
+        while (cursor.moveToNext()) {                                           // uses this method to search the results of the query
             String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
             String number = cursor.getString(cursor.getColumnIndexOrThrow("number"));
 
@@ -569,12 +569,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 Toast.makeText(this, "Contact " + name + " has an invalid number.", Toast.LENGTH_SHORT).show();
                 continue;
             }
-
+            // Try catch to send the SOS message
             try {
                 smsManager.sendTextMessage(number, null, "SOS! I need help.", null, null);
                 success = true;
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {             //captures every error that may occur during try
+                e.printStackTrace(); // Prints to the logcat so it is easier to diagnose the error
             }
         }
         cursor.close();
@@ -609,12 +609,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
-
+    //Verifies if all permissions were conceded
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == 1) {
+        if (requestCode == 1) {                     // iterates all the results and check if the location and sms permission were conceeded
             boolean locationGranted = false;
             boolean smsGranted = false;
 
