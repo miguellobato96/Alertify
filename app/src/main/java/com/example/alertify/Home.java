@@ -424,7 +424,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
         // Redirect to the LogIn screen
         Intent intent = new Intent(Home.this, LogIn.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Fecha todas as atividades no topo da pilha e inicia a nova atividade como nova tarefa no sistema.
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Close all the other activities and opens the new
         startActivity(intent);
         finish(); // Finish the current activity ( Home )
     }
@@ -438,7 +438,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 float x = event.getRawX(); //get actual position of the slider
                 float parentStart = sliderInstruction.getX(); //Define start of container
                 float parentEnd = parentStart + sliderInstruction.getWidth(); //Define end of container
-                float maxTranslation = sliderInstruction.getWidth() - sliderButton.getWidth(); //calcultes the max movement of the button.
+                float maxTranslation = sliderInstruction.getWidth() - sliderButton.getWidth(); //calculates the max movement of the button.
 
                 if (x >= parentStart && x <= parentEnd) {
                     float translationX = x - parentStart - sliderButton.getWidth() / 2; //Calculate the new horizontal position by the touch.
@@ -447,7 +447,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 return true;
             case MotionEvent.ACTION_UP: //Detects the button final's touch
                 float finalPosition = sliderButton.getTranslationX() + sliderButton.getWidth(); //Calculate's the button position + his width.
-                if (finalPosition >= sliderInstruction.getWidth() * 0.85) {            //confirms if the button is atleast 85% before the container ends
+                if (finalPosition >= sliderInstruction.getWidth() * 0.85) {            //confirms if the button is at least 85% before the container ends
                     lockSliderAtEnd();                                                  // if that happens the slider is blocked at the end
                 } else {
                     sliderButton.animate().translationX(0).setDuration(200).start(); //if not the button will go back to the initial position
@@ -542,13 +542,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     // Sends an SOS message to pinned contacts
     private void sendSosMessage() {
         // Check for SMS permission before sending messages
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)      // before sending the messages verifies the permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {                                         //if not the method is canceled
             Toast.makeText(this, "SMS permission not granted. Cannot send SOS.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();   //Execute a query to find the contacts where column isPinned = 1.
+        //Execute a query to find the contacts where column isPinned = 1.
+        SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();
         Cursor cursor = database.query(
                 "contacts",
                 new String[]{"name", "number"},
@@ -560,7 +561,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         SmsManager smsManager = SmsManager.getDefault();                        //uses the SMS manager to send the message
         boolean success = false;
 
-        while (cursor.moveToNext()) {                                           // uses this method to search the results of the query
+        while (cursor.moveToNext()) {                                           // method used to search the results of the query
             String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
             String number = cursor.getString(cursor.getColumnIndexOrThrow("number"));
 
@@ -573,7 +574,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             try {
                 smsManager.sendTextMessage(number, null, "SOS! I need help.", null, null);
                 success = true;
-            } catch (Exception e) {             //captures every error that may occur during try
+            } catch (Exception e) {             // Captures every error that may occur during try
                 e.printStackTrace(); // Prints to the logcat so it is easier to diagnose the error
             }
         }
@@ -614,7 +615,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == 1) {                     // iterates all the results and check if the location and sms permission were conceeded
+        // iterates all the results and checks if the location and sms permissions were given
+        if (requestCode == 1) {
             boolean locationGranted = false;
             boolean smsGranted = false;
 
