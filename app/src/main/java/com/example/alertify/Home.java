@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -35,8 +36,19 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -315,36 +327,223 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                     // Send the safe message
                     sendSafeMessage(contactName, contactNumber);
                 });
-
                 index++;
             }
         }
-
-
         cursor.close();
     }
+
+    private void fetchNearbyPlaces(double latitude, double longitude) throws PackageManager.NameNotFoundException {
+        ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+        String apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY");
+
+        int radius = 1000; // Radius in meters
+
+        // Google Places API URL
+        String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
+                "?location=" + latitude + "," + longitude +
+                "&radius=" + radius +
+                "&type=restaurant|bar|cafe|store|establishment" + // Add more types here
+                "&opennow=true" +
+                "&key=" + apiKey;
+
+        // Make a network request
+        new Thread(() -> {
+            try {
+                URL apiUrl = new URL(url);
+                HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
+                connection.setRequestMethod("GET");
+
+                InputStream inputStream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuilder response = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+
+                reader.close();
+                parseNearbyPlaces(response.toString(), latitude, longitude);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void parseNearbyPlaces(String jsonResponse, double userLat, double userLng) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONArray results = jsonObject.getJSONArray("results");
+
+            LatLng closestLocation = null;
+            double shortestDistance = Double.MAX_VALUE;
+
+            for (int i = 0; i < results.length(); i++) {
+                JSONObject place = results.getJSONObject(i);
+                JSONObject geometry = place.getJSONObject("geometry").getJSONObject("location");
+
+                double placeLat = geometry.getDouble("lat");
+                double placeLng = geometry.getDouble("lng");
+
+                // Calculate distance to user
+                double distance = calculateDistance(userLat, userLng, placeLat, placeLng);
+
+                if (distance < shortestDistance) {
+                    shortestDistance = distance;
+                    closestLocation = new LatLng(placeLat, placeLng);
+                }
+            }
+
+            if (closestLocation != null) {
+                showPathToDestination(closestLocation);
+            } else {
+                runOnUiThread(() -> Toast.makeText(this, "No open places nearby.", Toast.LENGTH_SHORT).show());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius of Earth in kilometers
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c * 1000; // Convert to meters
+    }
+
+    private void showPathToDestination(LatLng destination) {
+        if (googleMap == null) return;
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return; // Permissions not granted, exit the method
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                try {
+                    // Retrieve the API key from the AndroidManifest
+                    ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+                    String apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY");
+
+                    // Build the Google Directions API URL
+                    String url = "https://maps.googleapis.com/maps/api/directions/json" +
+                            "?origin=" + userLocation.latitude + "," + userLocation.longitude +
+                            "&destination=" + destination.latitude + "," + destination.longitude +
+                            "&key=" + apiKey;
+
+                    // Execute the HTTP request on a separate thread
+                    new Thread(() -> {
+                        try {
+                            URL apiUrl = new URL(url);
+                            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
+                            connection.setRequestMethod("GET");
+
+                            InputStream inputStream = connection.getInputStream();
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                            StringBuilder response = new StringBuilder();
+                            String line;
+
+                            while ((line = reader.readLine()) != null) {
+                                response.append(line);
+                            }
+
+                            reader.close();
+                            drawRouteOnMap(response.toString());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+
+    private void drawRouteOnMap(String jsonResponse) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONArray routes = jsonObject.getJSONArray("routes");
+            if (routes.length() > 0) {
+                JSONObject route = routes.getJSONObject(0);
+                JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
+                String encodedPolyline = overviewPolyline.getString("points");
+
+                List<LatLng> points = PolyUtil.decode(encodedPolyline);
+
+                runOnUiThread(() -> {
+                    googleMap.addPolyline(new PolylineOptions()
+                            .addAll(points)
+                            .width(10)
+                            .color(ContextCompat.getColor(this, R.color.primary_purple)));
+                });
+            } else {
+                runOnUiThread(() -> Toast.makeText(this, "No routes found.", Toast.LENGTH_SHORT).show());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            runOnUiThread(() -> Toast.makeText(this, "Failed to draw route.", Toast.LENGTH_SHORT).show());
+        }
+    }
+
 
 
     // Sends a "safe message" to a specific contact
     private void sendSafeMessage(String contactName, String contactNumber) {
-        // Check for SMS permission before sending the message
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "SMS permission not granted. Cannot send the message.", Toast.LENGTH_SHORT).show();
+        // Get the user's last known location
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                // Retrieve the user's current latitude and longitude
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
 
-        try {
-            SmsManager smsManager = SmsManager.getDefault();
-            String message = "I don't feel safe, please keep an eye on me!";
-            smsManager.sendTextMessage(contactNumber, null, message, null, null);
+                // Generate a Google Maps link with the user's location
+                String locationUrl = "https://www.google.com/maps?q=" + latitude + "," + longitude;
 
-            Toast.makeText(this, "Message sent to " + contactName, Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to send message to " + contactName, Toast.LENGTH_SHORT).show();
-        }
+                // Generate the monitoring message
+                String message = "I don't feel safe. Please monitor my location: " + locationUrl;
+
+                // Send the monitoring message to all pinned contacts
+                for (Contact contact : pinnedContacts) {
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage(contact.getNumber(), null, message, null, null);
+                }
+
+                Toast.makeText(this, "Monitoring request sent.", Toast.LENGTH_SHORT).show();
+
+                // Trigger the Map functionality to find nearby safe places
+                try {
+                    fetchNearbyPlaces(latitude, longitude);
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Toast.makeText(this, "Location not available. Cannot send monitoring request.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 
 
     // Opens the sidebar with an animation
@@ -424,9 +623,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
         // Redirect to the LogIn screen
         Intent intent = new Intent(Home.this, LogIn.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Close all the other activities and opens the new
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        finish(); // Finish the current activity ( Home )
+        finish(); // Finish the current activity
     }
 
     // Handles slider movement for SOS activation
@@ -435,22 +634,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             case MotionEvent.ACTION_DOWN:
                 return true;
             case MotionEvent.ACTION_MOVE:
-                float x = event.getRawX(); //get actual position of the slider
-                float parentStart = sliderInstruction.getX(); //Define start of container
-                float parentEnd = parentStart + sliderInstruction.getWidth(); //Define end of container
-                float maxTranslation = sliderInstruction.getWidth() - sliderButton.getWidth(); //calculates the max movement of the button.
+                float x = event.getRawX();
+                float parentStart = sliderInstruction.getX();
+                float parentEnd = parentStart + sliderInstruction.getWidth();
+                float maxTranslation = sliderInstruction.getWidth() - sliderButton.getWidth();
 
                 if (x >= parentStart && x <= parentEnd) {
-                    float translationX = x - parentStart - sliderButton.getWidth() / 2; //Calculate the new horizontal position by the touch.
-                    sliderButton.setTranslationX(Math.min(Math.max(translationX, 0), maxTranslation)); // Works as guarantee that the button will not leave the container
+                    float translationX = x - parentStart - sliderButton.getWidth() / 2;
+                    sliderButton.setTranslationX(Math.min(Math.max(translationX, 0), maxTranslation));
                 }
                 return true;
-            case MotionEvent.ACTION_UP: //Detects the button final's touch
-                float finalPosition = sliderButton.getTranslationX() + sliderButton.getWidth(); //Calculate's the button position + his width.
-                if (finalPosition >= sliderInstruction.getWidth() * 0.85) {            //confirms if the button is at least 85% before the container ends
-                    lockSliderAtEnd();                                                  // if that happens the slider is blocked at the end
+            case MotionEvent.ACTION_UP:
+                float finalPosition = sliderButton.getTranslationX() + sliderButton.getWidth();
+                if (finalPosition >= sliderInstruction.getWidth() * 0.85) {
+                    lockSliderAtEnd();
                 } else {
-                    sliderButton.animate().translationX(0).setDuration(200).start(); //if not the button will go back to the initial position
+                    sliderButton.animate().translationX(0).setDuration(200).start();
                 }
                 return true;
         }
@@ -459,9 +658,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     // Locks the slider at the end position and starts the countdown
     private void lockSliderAtEnd() {
-        sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());  //block the slider at the end
-        sliderInstruction.setText("Sending SOS in 5...");                               //update's the slider text
-        isSliderActive = true;                                                          //activates the slider
+        sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());
+        sliderInstruction.setText("Sending SOS in 5...");
+        isSliderActive = true;
 
         // Start countdown
         startCountdown(5); // 5 seconds countdown
@@ -541,50 +740,55 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     // Sends an SOS message to pinned contacts
     private void sendSosMessage() {
-        // Check for SMS permission before sending messages
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {                                         //if not the method is canceled
+        // Check if SMS permission is granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "SMS permission not granted. Cannot send SOS.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        //Execute a query to find the contacts where column isPinned = 1.
-        SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();
-        Cursor cursor = database.query(
-                "contacts",
-                new String[]{"name", "number"},
-                "isPinned = ?",
-                new String[]{"1"},
-                null, null, "pinned_order ASC"
-        );
+        // Get the user's last known location
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                // Retrieve the user's current latitude and longitude
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
 
-        SmsManager smsManager = SmsManager.getDefault();                        //uses the SMS manager to send the message
-        boolean success = false;
+                // Generate a Google Maps link with the user's location
+                String locationUrl = "https://www.google.com/maps?q=" + latitude + "," + longitude;
 
-        while (cursor.moveToNext()) {                                           // method used to search the results of the query
-            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            String number = cursor.getString(cursor.getColumnIndexOrThrow("number"));
+                // Query the database for pinned contacts
+                SQLiteDatabase database = contactDatabaseHelper.getReadableDatabase();
+                Cursor cursor = database.query(
+                        "contacts",
+                        new String[]{"name", "number"},
+                        "isPinned = ?",
+                        new String[]{"1"},
+                        null, null, "pinned_order ASC"
+                );
 
-            // Validate if the number is valid before attempting to send a message
-            if (number == null || number.isEmpty()) {
-                Toast.makeText(this, "Contact " + name + " has an invalid number.", Toast.LENGTH_SHORT).show();
-                continue;
+                // Send the SOS message to all pinned contacts
+                SmsManager smsManager = SmsManager.getDefault();
+                while (cursor.moveToNext()) {
+                    String number = cursor.getString(cursor.getColumnIndexOrThrow("number"));
+                    if (number != null && !number.isEmpty()) {
+                        String message = "SOS! I need help. Here's my location: " + locationUrl;
+                        smsManager.sendTextMessage(number, null, message, null, null);
+                    }
+                }
+
+                cursor.close();
+                Toast.makeText(this, "SOS sent with location!", Toast.LENGTH_SHORT).show();
+
+                // Trigger the Map functionality to find nearby safe places
+                try {
+                    fetchNearbyPlaces(latitude, longitude);
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Toast.makeText(this, "Location not available. SOS sent without location.", Toast.LENGTH_SHORT).show();
             }
-            // Try catch to send the SOS message
-            try {
-                smsManager.sendTextMessage(number, null, "SOS! I need help.", null, null);
-                success = true;
-            } catch (Exception e) {             // Captures every error that may occur during try
-                e.printStackTrace(); // Prints to the logcat so it is easier to diagnose the error
-            }
-        }
-        cursor.close();
-
-        if (success) {
-            Toast.makeText(this, "SOS sent!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "No SOS messages were successfully sent.", Toast.LENGTH_SHORT).show();
-        }
+        });
     }
 
     // Checks and requests SMS permissions if not already granted
@@ -610,12 +814,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
-    //Verifies if all permissions were conceded
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        // iterates all the results and checks if the location and sms permissions were given
         if (requestCode == 1) {
             boolean locationGranted = false;
             boolean smsGranted = false;
@@ -643,8 +845,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         }
     }
-
-
 
     // Contact class to store information about contacts
     public class Contact {
