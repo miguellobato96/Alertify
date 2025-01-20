@@ -19,7 +19,7 @@ public class ContactDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE contacts (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " + // Unique ID for each contact
                 "name TEXT, " +                            // Name of the contact
-                "number TEXT, " +                          // Phone number of the contact
+                "number TEXT UNIQUE, " +                   // Phone number of the contact
                 "isPinned INTEGER DEFAULT 0, " +           // Whether the contact is pinned (0 = not pinned, 1 = pinned)
                 "pinned_order INTEGER DEFAULT NULL" +      // Order for pinned contacts
                 ")");
