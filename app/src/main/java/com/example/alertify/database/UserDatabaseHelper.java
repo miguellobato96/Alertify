@@ -66,7 +66,17 @@ public class UserDatabaseHelper extends SQLiteOpenHelper {
         return result != -1; // Return true if insertion was successful
     }
 
-    // Method to check if a user exists in the database
+    // Method to check if an email already exists in the database (Sign Up)
+    public boolean userExists(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=?", new String[]{email});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return exists;
+    }
+
+    // Method to check if a user exists in the database (Login)
     public boolean checkUser(String email, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=? AND " + COLUMN_PASSWORD + "=?";
@@ -80,4 +90,6 @@ public class UserDatabaseHelper extends SQLiteOpenHelper {
 
         return exists; // Return true if the user exists
     }
+
+
 }
