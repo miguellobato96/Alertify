@@ -14,6 +14,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.telephony.SmsManager;
 import android.view.Gravity;
+import android.view.ViewTreeObserver;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -136,11 +137,21 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         sidebarLayout = findViewById(R.id.sidebar_layout);
         backgroundOverlay = findViewById(R.id.background_overlay);
         ImageButton openSettingsButton = findViewById(R.id.open_settings_button);
+        closeButton = findViewById(R.id.close_button);
+
+        sidebarLayout.setVisibility(View.INVISIBLE);
+        sidebarLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                sidebarLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                sidebarLayout.setTranslationX(sidebarLayout.getWidth());
+                sidebarLayout.setVisibility(View.GONE);
+            }
+        });
 
         // Set listeners for sidebar buttons
         openSettingsButton.setOnClickListener(v -> openSidebar());
         backgroundOverlay.setOnClickListener(v -> closeSidebar());
-        closeButton = findViewById(R.id.close_button);
         closeButton.setOnClickListener(v -> closeSidebar());
 
         // Set actions for sidebar menu buttons
@@ -548,6 +559,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     // Opens the sidebar with an animation
     private void openSidebar() {
+        if (sidebarLayout.getWidth() == 0) {
+            sidebarLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    sidebarLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    animateSidebarOpen();
+                }
+            });
+        } else {
+            animateSidebarOpen();
+        }
+    }
+    private void animateSidebarOpen() {
         sidebarLayout.setVisibility(View.VISIBLE);
         backgroundOverlay.setVisibility(View.VISIBLE);
         sidebarLayout.setTranslationX(sidebarLayout.getWidth());
