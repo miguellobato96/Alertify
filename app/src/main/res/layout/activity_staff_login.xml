@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_orange">
+
+    <!-- Logo do App -->
+    <TextView
+        android:id="@+id/tvLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Alertify "
+        android:textColor="@color/primary_yellow"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/bangers_regular"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp" />
+
+    <!-- Título Login -->
+    <TextView
+        android:id="@+id/tvLoginTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Staff Login"
+        android:textColor="@color/dark_grey"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/prompt_regular"
+        android:layout_below="@id/tvLogo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
+    <!-- Campo de Email -->
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:backgroundTint="@color/orange"
+        android:textColor="@color/dark_grey"
+        android:textColorHint="@color/orange"
+        android:fontFamily="@font/prompt_regular"
+        android:layout_below="@id/tvLoginTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp" />
+
+    <!-- Campo de Password -->
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:backgroundTint="@color/orange"
+        android:textColor="@color/dark_grey"
+        android:textColorHint="@color/orange"
+        android:fontFamily="@font/prompt_regular"
+        android:layout_below="@id/etEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
+    <!-- Botão Login -->
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Log In"
+        android:backgroundTint="@color/orange"
+        android:textColor="@color/light_white"
+        android:fontFamily="@font/prompt_regular"
+        android:layout_below="@id/etPassword"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp" />
+
+    <!-- Link para Recuperar Password -->
+    <TextView
+        android:id="@+id/tvForgotPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forgot Password?"
+        android:textColor="@color/orange"
+        android:textSize="14sp"
+        android:fontFamily="@font/prompt_regular"
+        android:layout_below="@id/btnLogin"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="16dp" />
+
+    <!-- Link para Sign Up -->
+    <TextView
+        android:id="@+id/tvSignUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Up"
+        android:textColor="@color/orange"
+        android:textSize="14sp"
+        android:fontFamily="@font/prompt_regular"
+        android:layout_below="@id/btnLogin"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="40dp"
+        android:layout_marginTop="16dp" />
+
+    <!-- Rodapé com o nome do desenvolvedor -->
+    <TextView
+        android:id="@+id/tvDeveloper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Developed by MAGIC Engineering"
+        android:textColor="@color/orange"
+        android:textSize="12sp"
+        android:fontFamily="@font/prompt_regular"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
+
+</RelativeLayout>
