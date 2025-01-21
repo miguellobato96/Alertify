@@ -49,9 +49,28 @@ public class SignUp extends AppCompatActivity {
                 return; // Stop execution if validation fails
             }
 
+            // Validate email format
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(SignUp.this, "Invalid email address", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Ensure password is at least 6 characters long
+            if (password.length() < 6) {
+                Toast.makeText(SignUp.this, "Password must be at least 6 characters long", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
             // Check if passwords match
             if (!password.equals(repeatPassword)) {
                 Toast.makeText(SignUp.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Check if email is already registered
+            if (dbHelper.userExists(email)) {
+                Toast.makeText(SignUp.this, "Email is already registered", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -59,13 +78,11 @@ public class SignUp extends AppCompatActivity {
             boolean isInserted = dbHelper.addUser(fullName, email, password);
 
             if (isInserted) {
-                // Registration success
                 Toast.makeText(SignUp.this, "User registered successfully", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(SignUp.this, LogIn.class)); // Navigate to Login page
-                finish(); // Close Sign Up activity
+                startActivity(new Intent(SignUp.this, LogIn.class));
+                finish();
             } else {
-                // Registration failure (e.g., email already exists)
-                Toast.makeText(SignUp.this, "Registration failed. Email may already exist.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SignUp.this, "Registration failed. Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
 

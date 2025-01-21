@@ -77,7 +77,7 @@ public class SosContacts extends AppCompatActivity {
                 if (cursor != null && cursor.moveToFirst()) {
                     String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                     String number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    if (!isContactAlreadyExists(name)) {
+                    if (!ifContactAlreadyExists(number)) {
                         // Add contact to database and update UI
                         addContactToDatabase(name, number, false);
                         addContactToView(name, false);
@@ -102,8 +102,8 @@ public class SosContacts extends AppCompatActivity {
     }
 
     // Check if a contact already exists in the database
-    private boolean isContactAlreadyExists(String name) {
-        try (Cursor cursor = database.query("contacts", null, "name=?", new String[]{name}, null, null, null)) {
+    private boolean ifContactAlreadyExists(String number) {
+        try (Cursor cursor = database.query("contacts", null, "number=?", new String[]{number}, null, null, null)) {
             return cursor.getCount() > 0;
         }
     }
