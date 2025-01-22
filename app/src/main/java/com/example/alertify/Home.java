@@ -322,7 +322,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 // Set click listener for the placeholder with feedback
                 placeholder.setOnClickListener(v -> {
                     // Visual feedback: Change the placeholder's background color temporarily
-                    placeholder.setBackgroundResource(R.color.orange); // Change the entire background of the placeholder
+                    placeholder.setBackgroundResource(R.color.orange);
 
                     // Reset the background color after a short delay
                     new Handler().postDelayed(() -> {
