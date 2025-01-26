@@ -64,5 +64,10 @@
             android:name=".SosContacts"
             android:exported="true" />
 
+        <!-- Staff Home Activity -->
+        <activity
+            android:name=".StaffHome"
+            android:exported="true" />
+
     </application>
 </manifest>
