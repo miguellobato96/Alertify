@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/light_purple">
 
-    <!-- Logo do App -->
+    <!-- App Logo -->
     <TextView
         android:id="@+id/tvLogo"
         android:layout_width="wrap_content"
@@ -18,7 +18,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp" />
 
-    <!-- Título Login -->
+    <!-- Login Title -->
     <TextView
         android:id="@+id/tvLoginTitle"
         android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
-    <!-- Campo de Email -->
+    <!-- Email Input Field -->
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="300dp"
@@ -47,7 +47,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp" />
 
-    <!-- Campo de Password -->
+    <!-- Password Input Field -->
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="300dp"
@@ -62,7 +62,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
-    <!-- Botão Login -->
+    <!-- Login Button -->
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="300dp"
@@ -75,13 +75,13 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp" />
 
-    <!-- Link para Recuperar Password -->
+    <!-- Forgot Password Link -->
     <TextView
         android:id="@+id/tvForgotPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Forgot Password?"
-        android:textColor="@color/primary_purple"
+        android:textColor="@color/purple"
         android:textSize="14sp"
         android:fontFamily="@font/prompt_regular"
         android:layout_below="@id/btnLogin"
@@ -89,7 +89,7 @@
         android:layout_marginStart="40dp"
         android:layout_marginTop="16dp" />
 
-    <!-- Link para Sign Up -->
+    <!-- Sign Up Link -->
     <TextView
         android:id="@+id/tvSignUp"
         android:layout_width="wrap_content"
@@ -103,7 +103,7 @@
         android:layout_marginEnd="40dp"
         android:layout_marginTop="16dp" />
 
-    <!-- Rodapé com o nome do desenvolvedor -->
+    <!-- Footer -->
     <TextView
         android:id="@+id/tvDeveloper"
         android:layout_width="wrap_content"
