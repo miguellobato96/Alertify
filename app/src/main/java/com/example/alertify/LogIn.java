@@ -16,7 +16,7 @@ public class LogIn extends AppCompatActivity {
 
     private EditText etEmail, etPassword; // Input fields for email and password
     private Button btnLogin; // Log In button
-    private TextView tvSignUp; // Sign Up navigation text
+    private TextView tvSignUp, staffButton; // Sign Up navigation text
     private UserDatabaseHelper dbHelper; // Helper for database operations
 
     @Override
@@ -32,6 +32,12 @@ public class LogIn extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         tvSignUp = findViewById(R.id.tvSignUp);
+        staffButton = findViewById(R.id.staffButton);
+
+        staffButton.setOnClickListener(v -> {
+
+            startActivity(new Intent(LogIn.this, StaffHome.class));
+        });
 
         // Set click listener for the Log In button
         btnLogin.setOnClickListener(v -> {

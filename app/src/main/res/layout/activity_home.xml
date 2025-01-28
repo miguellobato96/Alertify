@@ -238,8 +238,8 @@
             android:src="@drawable/close_icon"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:layout_marginTop="45dp"
-            android:gravity="start"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="15dp" />
+
 
         <!-- Sidebar Menu Buttons -->
         <Button
