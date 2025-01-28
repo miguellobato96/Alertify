@@ -167,7 +167,6 @@
             android:layout_width="65dp"
             android:layout_height="65dp"
             android:background="@drawable/circle_background"
-            android:elevation="8dp"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="0dp">
 
@@ -241,7 +240,7 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:layout_marginTop="45dp"
             android:gravity="start"
-            android:layout_marginEnd="15dp" />
+            android:layout_marginEnd="16dp" />
 
         <!-- Sidebar Menu Buttons -->
         <Button
@@ -250,6 +249,8 @@
             android:layout_height="wrap_content"
             android:text="Home"
             android:textColor="@color/orange"
+            android:fontFamily="@font/prompt_regular"
+            android:textStyle="bold"
             android:background="@color/purple"
             android:padding="16dp"
             android:gravity="start"
@@ -261,6 +262,8 @@
             android:layout_height="wrap_content"
             android:text="SOS Contacts"
             android:textColor="@color/dark_grey"
+            android:fontFamily="@font/prompt_regular"
+            android:textStyle="bold"
             android:background="@android:color/transparent"
             android:padding="16dp"
             android:gravity="start"
@@ -272,6 +275,8 @@
             android:layout_height="wrap_content"
             android:text="Safety Tips"
             android:textColor="@color/dark_grey"
+            android:fontFamily="@font/prompt_regular"
+            android:textStyle="bold"
             android:background="@android:color/transparent"
             android:padding="16dp"
             android:gravity="start"
@@ -283,6 +288,8 @@
             android:layout_height="wrap_content"
             android:text="About Us"
             android:textColor="@color/dark_grey"
+            android:fontFamily="@font/prompt_regular"
+            android:textStyle="bold"
             android:background="@android:color/transparent"
             android:padding="16dp"
             android:gravity="start"
@@ -294,6 +301,8 @@
             android:layout_height="wrap_content"
             android:text="Terms and Conditions"
             android:textColor="@color/dark_grey"
+            android:fontFamily="@font/prompt_regular"
+            android:textStyle="bold"
             android:background="@android:color/transparent"
             android:padding="16dp"
             android:gravity="start"
@@ -303,11 +312,28 @@
             android:id="@+id/btn_logout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
-            android:layout_marginEnd="20dp"
-            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="16dp"
+            android:layout_above="@id/sidebarFooterText"
             android:layout_alignParentEnd="true"
             android:text="Log out"
-            android:textColor="@color/orange" />
+            android:textColor="@color/orange"
+            android:fontFamily="@font/prompt_regular"
+            android:textStyle="bold" />
+
+        <!-- Sidebar Footer -->
+        <TextView
+            android:id="@+id/sidebarFooterText"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="ALERTIFY"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_yellow"
+            android:fontFamily="@font/bangers_regular"
+            android:gravity="center"
+            android:background="@drawable/sidebar_footer_bg"
+            android:layout_alignParentBottom="true"/>
+
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
