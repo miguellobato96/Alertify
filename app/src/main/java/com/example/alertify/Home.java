@@ -683,12 +683,18 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     // Locks the slider at the end position and starts the countdown
     private void lockSliderAtEnd() {
         sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());
-        sliderInstruction.setText("Sending SOS in 5...");
+        sliderInstruction.setText("Click to abort (" + 5 + ")...");
         isSliderActive = true;
 
-        // Start countdown
-        startCountdown(5); // 5 seconds countdown
+        // Make sosSlider clickable for cancellation
+        View sosSlider = findViewById(R.id.sosSlider);
+        sosSlider.setOnClickListener(v -> cancelSOS());
+
+        // Start the countdown
+        startCountdown(5);
     }
+
+
 
     // Start a countdown with the ability to cancel
     private void startCountdown(int seconds) {
@@ -698,59 +704,36 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
             @Override
             public void run() {
+                if (!isSliderActive) return; // Exit if cancelled
+
                 if (timeLeft > 0) {
-                    sliderInstruction.setText("Sending SOS in " + timeLeft + "...");
+                    sliderInstruction.setText("Click to abort (" + timeLeft + ")...");
                     timeLeft--;
-                    handler.postDelayed(this, 1000); // Continue countdown every second
+                    handler.postDelayed(this, 1000);
                 } else {
-                    // Send SOS when countdown finishes
-                    sendSosMessage();
-                    resetSliderWithDelay(2000); // Reset slider after 2 seconds
+                    sendSosMessage(); // Only send if not cancelled
+                    resetSliderWithDelay(2000);
                 }
             }
         };
 
-        // Add cancel button functionality
-        addCancelButton(handler, countdownRunnable, seconds);
-
-        // Start the countdown
         handler.post(countdownRunnable);
     }
 
-    // Add a cancel button to stop the countdown
-    private void addCancelButton(Handler handler, Runnable countdownRunnable, int seconds) {
-        Button cancelButton = new Button(this);
-        cancelButton.setText("Cancel");
-        cancelButton.setBackgroundColor(ContextCompat.getColor(this, R.color.orange));
-        cancelButton.setTextColor(ContextCompat.getColor(this, R.color.white));
-        cancelButton.setPadding(16, 8, 16, 8);
+    // Ability to cancel the SOS message
+    private void cancelSOS() {
+        isSliderActive = false; // Stop the countdown
+        sliderInstruction.setText("Slide to Send SOS");
 
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-        params.bottomMargin = 100;
-        cancelButton.setLayoutParams(params);
+        // Reset the slider position
+        sliderButton.animate().translationX(0).setDuration(200).start();
 
-        // Add the button to the layout
-        FrameLayout rootLayout = findViewById(android.R.id.content);
-        rootLayout.addView(cancelButton);
+        // Remove the click listener after cancellation
+        View sosSlider = findViewById(R.id.sosSlider);
+        sosSlider.setOnClickListener(null);
 
-        cancelButton.setOnClickListener(v -> {
-            // Cancel the countdown
-            handler.removeCallbacks(countdownRunnable);
-            sliderInstruction.setText("Cancelled");
-            resetSliderWithDelay(1000); // Reset slider after 1 second
-            rootLayout.removeView(cancelButton); // Remove the button
-        });
-
-        // Automatically remove the cancel button after the countdown finishes
-        new Handler().postDelayed(() -> {
-            if (rootLayout.indexOfChild(cancelButton) != -1) {
-                rootLayout.removeView(cancelButton); // Remove the button if it still exists
-            }
-        }, (seconds + 2) * 1000L); // Buffer to ensure button removal after the countdown
+        // Show feedback
+        Toast.makeText(this, "SOS cancelled", Toast.LENGTH_SHORT).show();
     }
 
     // Reset the slider to its initial position with a delay
