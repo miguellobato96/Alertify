@@ -18,7 +18,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp" />
 
-    <!-- Títle -->
+    <!-- Title -->
     <TextView
         android:id="@+id/tvSignUpTitle"
         android:layout_width="wrap_content"

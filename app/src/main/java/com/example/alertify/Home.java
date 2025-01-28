@@ -14,11 +14,13 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.telephony.SmsManager;
 import android.view.Gravity;
+import android.view.ViewTreeObserver;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -136,11 +138,21 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         sidebarLayout = findViewById(R.id.sidebar_layout);
         backgroundOverlay = findViewById(R.id.background_overlay);
         ImageButton openSettingsButton = findViewById(R.id.open_settings_button);
+        closeButton = findViewById(R.id.close_button);
+
+        sidebarLayout.setVisibility(View.INVISIBLE);
+        sidebarLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                sidebarLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                sidebarLayout.setTranslationX(sidebarLayout.getWidth());
+                sidebarLayout.setVisibility(View.GONE);
+            }
+        });
 
         // Set listeners for sidebar buttons
         openSettingsButton.setOnClickListener(v -> openSidebar());
         backgroundOverlay.setOnClickListener(v -> closeSidebar());
-        closeButton = findViewById(R.id.close_button);
         closeButton.setOnClickListener(v -> closeSidebar());
 
         // Set actions for sidebar menu buttons
@@ -311,7 +323,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 // Set click listener for the placeholder with feedback
                 placeholder.setOnClickListener(v -> {
                     // Visual feedback: Change the placeholder's background color temporarily
-                    placeholder.setBackgroundResource(R.color.orange); // Change the entire background of the placeholder
+                    placeholder.setBackgroundResource(R.color.orange);
 
                     // Reset the background color after a short delay
                     new Handler().postDelayed(() -> {
@@ -548,6 +560,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     // Opens the sidebar with an animation
     private void openSidebar() {
+        if (sidebarLayout.getWidth() == 0) {
+            sidebarLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    sidebarLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    animateSidebarOpen();
+                }
+            });
+        } else {
+            animateSidebarOpen();
+        }
+    }
+    private void animateSidebarOpen() {
         sidebarLayout.setVisibility(View.VISIBLE);
         backgroundOverlay.setVisibility(View.VISIBLE);
         sidebarLayout.setTranslationX(sidebarLayout.getWidth());
@@ -659,11 +684,25 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     // Locks the slider at the end position and starts the countdown
     private void lockSliderAtEnd() {
         sliderButton.setTranslationX(sliderInstruction.getWidth() - sliderButton.getWidth());
-        sliderInstruction.setText("Sending SOS in 5...");
+        sliderInstruction.setText("Click to abort - Sending SOS in 5...");
+        sliderInstruction.setTextColor(getResources().getColor(R.color.dark_grey)); // Change text color
         isSliderActive = true;
 
+        // Change colors when countdown starts
+        View sosSlider = findViewById(R.id.sosSlider);
+        sosSlider.setBackgroundResource(R.drawable.slider_bg_active);
+
+        View sliderButton = findViewById(R.id.sliderButton);
+        sliderButton.setBackgroundResource(R.drawable.slider_handle_active);
+
+        ImageView sliderIcon = findViewById(R.id.sliderIcon);
+        sliderIcon.setImageResource(R.drawable.slider_handle_arrow_active);
+
+        // Allow slider to be clickable to cancel
+        sosSlider.setOnClickListener(v -> cancelSOS());
+
         // Start countdown
-        startCountdown(5); // 5 seconds countdown
+        startCountdown(5);
     }
 
     // Start a countdown with the ability to cancel
@@ -674,59 +713,46 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
             @Override
             public void run() {
+                if (!isSliderActive) return; // Exit if cancelled
+
                 if (timeLeft > 0) {
-                    sliderInstruction.setText("Sending SOS in " + timeLeft + "...");
+                    sliderInstruction.setText("Click to abort (" + timeLeft + ")...");
                     timeLeft--;
-                    handler.postDelayed(this, 1000); // Continue countdown every second
+                    handler.postDelayed(this, 1000);
                 } else {
-                    // Send SOS when countdown finishes
-                    sendSosMessage();
-                    resetSliderWithDelay(2000); // Reset slider after 2 seconds
+                    sendSosMessage(); // Only send if not cancelled
+                    resetSliderWithDelay(2000);
                 }
             }
         };
 
-        // Add cancel button functionality
-        addCancelButton(handler, countdownRunnable, seconds);
-
-        // Start the countdown
         handler.post(countdownRunnable);
     }
 
-    // Add a cancel button to stop the countdown
-    private void addCancelButton(Handler handler, Runnable countdownRunnable, int seconds) {
-        Button cancelButton = new Button(this);
-        cancelButton.setText("Cancel");
-        cancelButton.setBackgroundColor(ContextCompat.getColor(this, R.color.orange));
-        cancelButton.setTextColor(ContextCompat.getColor(this, R.color.white));
-        cancelButton.setPadding(16, 8, 16, 8);
+    // Cancels the SOS process and resets the slider
+    private void cancelSOS() {
+        isSliderActive = false; // Stop the countdown
+        sliderInstruction.setText("Slide to Send SOS");
+        sliderInstruction.setTextColor(getResources().getColor(R.color.primary_yellow)); // Reset text color
 
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-        params.bottomMargin = 100;
-        cancelButton.setLayoutParams(params);
+        // Reset the slider position
+        sliderButton.animate().translationX(0).setDuration(200).start();
 
-        // Add the button to the layout
-        FrameLayout rootLayout = findViewById(android.R.id.content);
-        rootLayout.addView(cancelButton);
+        // Reset colors when cancelled
+        View sosSlider = findViewById(R.id.sosSlider);
+        sosSlider.setBackgroundResource(R.drawable.slider_bg);
 
-        cancelButton.setOnClickListener(v -> {
-            // Cancel the countdown
-            handler.removeCallbacks(countdownRunnable);
-            sliderInstruction.setText("Cancelled");
-            resetSliderWithDelay(1000); // Reset slider after 1 second
-            rootLayout.removeView(cancelButton); // Remove the button
-        });
+        View sliderButton = findViewById(R.id.sliderButton);
+        sliderButton.setBackgroundResource(R.drawable.slider_handle);
 
-        // Automatically remove the cancel button after the countdown finishes
-        new Handler().postDelayed(() -> {
-            if (rootLayout.indexOfChild(cancelButton) != -1) {
-                rootLayout.removeView(cancelButton); // Remove the button if it still exists
-            }
-        }, (seconds + 2) * 1000L); // Buffer to ensure button removal after the countdown
+        ImageView sliderIcon = findViewById(R.id.sliderIcon);
+        sliderIcon.setImageResource(R.drawable.slider_handle_arrow);
+
+        // Remove the click listener after cancellation
+        sosSlider.setOnClickListener(null);
+
+        // Show feedback
+        Toast.makeText(this, "SOS cancelled", Toast.LENGTH_SHORT).show();
     }
 
     // Reset the slider to its initial position with a delay
@@ -734,7 +760,21 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         new Handler().postDelayed(() -> {
             sliderButton.animate().translationX(0).setDuration(200).start();
             sliderInstruction.setText("Slide to Send SOS");
+            sliderInstruction.setTextColor(getResources().getColor(R.color.primary_yellow)); // Reset text color
             isSliderActive = false;
+
+            // Reset colors to default when countdown ends
+            View sosSlider = findViewById(R.id.sosSlider);
+            sosSlider.setBackgroundResource(R.drawable.slider_bg);
+
+            View sliderButton = findViewById(R.id.sliderButton);
+            sliderButton.setBackgroundResource(R.drawable.slider_handle);
+
+            ImageView sliderIcon = findViewById(R.id.sliderIcon);
+            sliderIcon.setImageResource(R.drawable.slider_handle_arrow);
+
+            // Remove the click listener after reset
+            sosSlider.setOnClickListener(null);
         }, delay);
     }
 

@@ -9,12 +9,13 @@
     <!-- Back Arrow -->
     <ImageButton
         android:id="@+id/back_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/close_icon"
+        android:layout_marginTop="45dp"
+        android:src="@drawable/return_arrow"
         android:contentDescription="Back"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         app:tint="@color/dark_grey" />
@@ -25,7 +26,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/prompt_regular"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
+        android:padding="16dp"
         android:layout_centerHorizontal="true"
         android:text="Emergency\nContacts"
         android:textColor="@color/dark_grey"
@@ -69,6 +71,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/prompt_regular"
                 android:layout_marginTop="16dp"
+                android:padding="16dp"
                 android:text="Pinned Contacts"
                 android:textColor="@color/dark_grey"
                 android:textSize="18sp"
@@ -101,6 +104,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/prompt_regular"
                 android:layout_marginTop="16dp"
+                android:padding="16dp"
                 android:text="Contacts"
                 android:textColor="@color/dark_grey"
                 android:textSize="18sp"
@@ -121,7 +125,7 @@
         android:id="@+id/add_contact_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@id/footerText"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
         android:background="@drawable/add_contact"
@@ -131,5 +135,20 @@
         android:textStyle="bold"
         android:gravity="center"
         android:contentDescription="Add Contact" />
+
+    <!-- Footer -->
+    <TextView
+        android:id="@+id/footerText"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="ALERTIFY"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_yellow"
+        android:fontFamily="@font/bangers_regular"
+        android:gravity="center"
+        android:background="@color/primary_purple"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

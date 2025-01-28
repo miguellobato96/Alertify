@@ -30,7 +30,7 @@
         <!-- Meta-data for Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBonO1yU-ZwiE2v29cEGvuZYV4_uRwEyOE" />
+            android:value="YOUR_API_KEY" />
 
         <!-- Splash Screen Activity -->
         <activity
