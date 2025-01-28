@@ -142,7 +142,7 @@
         android:id="@+id/sosSlider"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="@drawable/slider_background"
+        android:background="@drawable/slider_bg"
         android:padding="8dp"
         android:layout_margin="16dp"
         android:clickable="true"
@@ -151,7 +151,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Texto do Slider -->
+        <!-- Slider text -->
         <TextView
             android:id="@+id/sliderInstruction"
             android:layout_width="match_parent"
@@ -163,25 +163,23 @@
             android:gravity="center"
             android:layout_gravity="center" />
 
-        <!-- Botão Deslizante -->
+        <!-- Slider Button -->
         <FrameLayout
             android:id="@+id/sliderButton"
             android:layout_width="65dp"
             android:layout_height="65dp"
-            android:background="@drawable/circle_background"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="0dp">
+            android:layout_marginStart="0dp"
+            android:background="@drawable/slider_handle">
 
             <ImageView
                 android:id="@+id/sliderIcon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/ic_arrow_right"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:src="@drawable/slider_handle_arrow" />
         </FrameLayout>
     </FrameLayout>
-
-
 
     <!-- Sidebar Button -->
     <ImageButton
@@ -194,6 +192,7 @@
         android:layout_margin="16dp"
         android:background="?android:attr/selectableItemBackgroundBorderless" />
 
+    <!-- Sidebar -->
     <!-- Sidebar Background Overlay -->
     <View
         android:id="@+id/background_overlay"
@@ -202,6 +201,7 @@
         android:background="#80000000"
         android:visibility="gone" />
 
+    <!-- Sidebar Layout -->
     <RelativeLayout
         android:id="@+id/sidebar_layout"
         android:layout_width="300dp"
@@ -214,9 +214,6 @@
         android:visibility="gone"
         tools:visibility="visible"
         android:clickable="true">
-        >
-
-
 
         <!-- Sidebar Title -->
         <TextView
@@ -258,6 +255,7 @@
             android:gravity="start"
             android:layout_below="@id/settingstv" />
 
+        <!-- SOS Contacts -->
         <Button
             android:id="@+id/btn_sos_contacts"
             android:layout_width="match_parent"
@@ -271,6 +269,7 @@
             android:gravity="start"
             android:layout_below="@id/btn_home" />
 
+        <!-- Safety Tips -->
         <Button
             android:id="@+id/btn_safety_tips"
             android:layout_width="match_parent"
@@ -284,6 +283,7 @@
             android:gravity="start"
             android:layout_below="@id/btn_sos_contacts" />
 
+        <!-- About Us -->
         <Button
             android:id="@+id/btn_about_us"
             android:layout_width="match_parent"
@@ -297,6 +297,7 @@
             android:gravity="start"
             android:layout_below="@id/btn_safety_tips" />
 
+        <!-- Terms & Conditions -->
         <Button
             android:id="@+id/btn_terms_conditions"
             android:layout_width="match_parent"
@@ -310,6 +311,7 @@
             android:gravity="start"
             android:layout_below="@id/btn_about_us" />
 
+        <!-- Log Out Button -->
         <Button
             android:id="@+id/btn_logout"
             android:layout_width="wrap_content"
@@ -336,6 +338,6 @@
             android:gravity="center"
             android:background="@drawable/sidebar_footer_bg"
             android:layout_alignParentBottom="true"/>
-
     </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
