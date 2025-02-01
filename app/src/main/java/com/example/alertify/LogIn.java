@@ -35,8 +35,7 @@ public class LogIn extends AppCompatActivity {
         staffButton = findViewById(R.id.staffButton);
 
         staffButton.setOnClickListener(v -> {
-
-            startActivity(new Intent(LogIn.this, StaffHome.class));
+            startActivity(new Intent(LogIn.this, StaffLogIn.class));
         });
 
         // Set click listener for the Log In button

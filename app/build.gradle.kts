@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services") // Google services Gradle plugin
 }
 
 android {
@@ -51,4 +52,8 @@ dependencies {
 
     // Networking library for API calls
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+
+    // Firebase dependencies
+    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="@drawable/notification_item_bg"
+    android:layout_marginBottom="8dp">
+
+    <!-- Alert Message -->
+    <TextView
+        android:id="@+id/alertMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:text="User needs help!"
+        android:textColor="@color/dark_grey"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Assist Button -->
+    <ImageButton
+        android:id="@+id/btnGo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:backgroundTint="@color/orange"
+        android:src="@drawable/btn_assist"
+        android:contentDescription="Assist" />
+
+    <!-- Dismiss Button -->
+    <ImageButton
+        android:id="@+id/btnIgnore"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:backgroundTint="@color/dark_grey"
+        android:src="@drawable/btn_dismiss"
+        android:contentDescription="Dismiss"
+        android:layout_marginStart="6dp" />
+</LinearLayout>
