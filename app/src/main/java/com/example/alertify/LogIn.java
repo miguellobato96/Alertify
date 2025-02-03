@@ -16,7 +16,7 @@ public class LogIn extends AppCompatActivity {
 
     private EditText etEmail, etPassword; // Input fields for email and password
     private Button btnLogin; // Log In button
-    private TextView tvSignUp, staffButton; // Sign Up navigation text
+    private TextView tvSignUp, tvStaff; // Sign Up navigation text
     private UserDatabaseHelper dbHelper; // Helper for database operations
 
     @Override
@@ -32,10 +32,12 @@ public class LogIn extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         tvSignUp = findViewById(R.id.tvSignUp);
-        staffButton = findViewById(R.id.staffButton);
+        tvStaff = findViewById(R.id.tvStaff);
 
-        staffButton.setOnClickListener(v -> {
-            startActivity(new Intent(LogIn.this, StaffLogIn.class));
+        // Navigate to the Staff Login page when "Staff" text is clicked
+        tvStaff.setOnClickListener(v -> {
+            Intent intent = new Intent(LogIn.this, StaffLogIn.class);
+            startActivity(intent); // Open the Staff Login activity
         });
 
         // Set click listener for the Log In button

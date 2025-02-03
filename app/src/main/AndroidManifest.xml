@@ -78,5 +78,10 @@
             android:name=".StaffHome"
             android:exported="true" />
 
+        <!-- Staff Login Activity -->
+        <activity
+            android:name=".StaffLogIn"
+            android:exported="true" />
+
     </application>
 </manifest>
