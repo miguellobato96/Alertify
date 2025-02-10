@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -215,6 +216,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         // Configure the map if permissions are granted
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             setupMap();
+
+            // Enable My Location layer
+            googleMap.setMyLocationEnabled(true);
+
+            // Move the location button to the bottom-right corner
+            if (mapView != null) {
+                View locationButton = ((View) mapView.findViewById(Integer.parseInt("1"))
+                        .getParent()).findViewById(Integer.parseInt("2"));
+
+                // Update layout parameters to move the button
+                if (locationButton != null) {
+                    RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0); // Remove from top
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE); // Align to bottom
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE); // Align to right
+                    layoutParams.setMargins(0, 0, 30, 30); // Set margins (adjust as needed)
+                }
+            }
         }
     }
 
