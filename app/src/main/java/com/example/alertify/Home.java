@@ -190,8 +190,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         btnLogOut.setOnClickListener(v -> showLogoutDialog());
     }
 
-
-            // Requests perms
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
@@ -832,7 +830,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         });
     }
 
-                    URL url = new URL("https://fcm.googleapis.com/fcm/send");
     // Checks and requests SMS permissions if not already granted
     private void checkAndRequestPermissions() {
         // List of permissions to request
