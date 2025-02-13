@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.telephony.SmsManager;
-import android.view.Gravity;
 import android.view.ViewTreeObserver;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,6 +20,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,8 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback {
-
-    private static final int SMS_PERMISSION_CODE = 100;
 
     // Sidebar layout and buttons
     private View sidebarLayout;
@@ -192,21 +190,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         btnLogOut.setOnClickListener(v -> showLogoutDialog());
     }
 
-
-    // Checks if location permissions are granted and requests them if not
-    private void checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            // Requests perms
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else {
-            // Update map
-            setupMap();
-        }
-    }
-
-
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
@@ -214,6 +197,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         // Configure the map if permissions are granted
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             setupMap();
+
+            // Enable My Location layer
+            googleMap.setMyLocationEnabled(true);
+            // Move the location button to the bottom-right corner
+            if (mapView != null) {
+                View locationButton = ((View) mapView.findViewById(Integer.parseInt("1"))
+                        .getParent()).findViewById(Integer.parseInt("2"));
+                // Update layout parameters to move the button
+                if (locationButton != null) {
+                    RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0); // Remove from top
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE); // Align to bottom
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE); // Align to right
+                    layoutParams.setMargins(0, 0, 30, 30); // Set margins (adjust as needed)
+                }
+            }
         }
     }
 

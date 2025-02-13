@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/light_purple">
+
+    <!-- Staff Login Button -->
+    <TextView
+        android:id="@+id/tvStaff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Staff"
+        android:textColor="@color/primary_purple"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"/>
 
     <!-- App Logo -->
     <TextView
@@ -115,15 +129,5 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp" />
-
-    <TextView
-        android:id="@+id/staffButton"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="S"
-        android:textStyle="bold"
-        android:textSize="50dp"
-        android:textColor="@color/primary_purple"
-        android:padding="10dp"/>
 
 </RelativeLayout>

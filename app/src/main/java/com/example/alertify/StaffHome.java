@@ -1,69 +1,66 @@
 package com.example.alertify;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
+import android.widget.Button;
+import android.widget.LinearLayout;
+
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.alertify.database.ContactDatabaseHelper;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import java.util.ArrayList;
+import com.google.android.gms.maps.OnMapReadyCallback;
 
-public class StaffHome extends AppCompatActivity {
+public class StaffHome extends AppCompatActivity implements OnMapReadyCallback {
 
-    private FrameLayout sliderButton;
-    private View expandedView1;
-    private ImageButton toggleButton1;
-
-    private ArrayList<View> placeholders;
-    private ContactDatabaseHelper contactDatabaseHelper;
-    private GoogleMap googleMap;
     private MapView mapView;
-    private FusedLocationProviderClient fusedLocationClient;
+    private GoogleMap googleMap;
+    private LinearLayout notificationList;
+    private Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_staff_home);
 
-        // Find views
-        View placeholder1 = findViewById(R.id.contact_placeholderStaff_1);
-        expandedView1 = findViewById(R.id.contact_placeholderStaffOpen_1);
-        toggleButton1 = findViewById(R.id.open_button);
+        // Initialize UI Elements
+        mapView = findViewById(R.id.mapView);
+        notificationList = findViewById(R.id.notificationList);
+        btnLogout = findViewById(R.id.btn_logout);
 
-        // Initially hide the expanded section
-        expandedView1.setVisibility(View.GONE);
+        // MapView Setup
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
 
-        // Allow only the button to trigger expansion
-        toggleButton1.setOnClickListener(v -> toggleContactDetails(expandedView1, toggleButton1));
-
-        // Initialize location client
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        // Initialize slider elements
-        sliderButton = findViewById(R.id.sliderButton);
-
-        // Initialize placeholders for pinned contacts
-        placeholders = new ArrayList<>();
-        placeholders.add(placeholder1);
-        placeholders.add(expandedView1);
-
-        // Initialize database helper for contacts
-        contactDatabaseHelper = new ContactDatabaseHelper(this);
+        // Logout Button Click -> Redirect to Login
+        btnLogout.setOnClickListener(v -> {
+            Intent intent = new Intent(StaffHome.this, StaffLogIn.class);
+            startActivity(intent);
+            finish(); // Close current activity
+        });
     }
 
-    // Function to toggle the contact details visibility
-    private void toggleContactDetails(View expandView, ImageButton toggleButton) {
-        if (expandView.getVisibility() == View.GONE) {
-            expandView.setVisibility(View.VISIBLE);
-            expandView.animate().alpha(1.0f).setDuration(200).start();
-            toggleButton.setImageResource(R.drawable.close_icon); // Change icon to indicate collapse
-        } else {
-            expandView.animate().alpha(0.0f).setDuration(200).withEndAction(() -> expandView.setVisibility(View.GONE)).start();
-            toggleButton.setImageResource(R.drawable.ic_arrow_right); // Change icon to indicate expansion
-        }
+    @Override
+    public void onMapReady(GoogleMap map) {
+        googleMap = map;
+        // Future: Add markers when an alert is received
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
     }
 }
