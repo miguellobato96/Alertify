@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 public class StaffHome extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -23,9 +22,6 @@ public class StaffHome extends AppCompatActivity implements OnMapReadyCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_staff_home);
-
-        // Subscribe staff users to receive alerts
-        FirebaseMessaging.getInstance().subscribeToTopic("staff_alerts");
 
         // Initialize UI Elements
         mapView = findViewById(R.id.mapView);
@@ -66,6 +62,5 @@ public class StaffHome extends AppCompatActivity implements OnMapReadyCallback {
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
-        FirebaseMessaging.getInstance().unsubscribeFromTopic("staff_alerts");
     }
 }

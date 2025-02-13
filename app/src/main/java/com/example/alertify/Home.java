@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.telephony.SmsManager;
-import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,15 +47,12 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback {
-
-    private static final int SMS_PERMISSION_CODE = 100;
 
     // Sidebar layout and buttons
     private View sidebarLayout;
@@ -195,20 +191,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     }
 
 
-    // Checks if location permissions are granted and requests them if not
-    private void checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             // Requests perms
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else {
-            // Update map
-            setupMap();
-        }
-    }
-
-
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
@@ -219,12 +202,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
             // Enable My Location layer
             googleMap.setMyLocationEnabled(true);
-
             // Move the location button to the bottom-right corner
             if (mapView != null) {
                 View locationButton = ((View) mapView.findViewById(Integer.parseInt("1"))
                         .getParent()).findViewById(Integer.parseInt("2"));
-
                 // Update layout parameters to move the button
                 if (locationButton != null) {
                     RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
@@ -576,6 +557,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         });
     }
 
+
+
     // Opens the sidebar with an animation
     private void openSidebar() {
         if (sidebarLayout.getWidth() == 0) {
@@ -796,7 +779,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }, delay);
     }
 
-    // Sends an SOS message to pinned contacts and notifies staff
+    // Sends an SOS message to pinned contacts
     private void sendSosMessage() {
         // Check if SMS permission is granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
@@ -829,16 +812,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 while (cursor.moveToNext()) {
                     String number = cursor.getString(cursor.getColumnIndexOrThrow("number"));
                     if (number != null && !number.isEmpty()) {
-                        String message = "🚨 SOS! I need help. Here's my location: " + locationUrl;
+                        String message = "SOS! I need help. Here's my location: " + locationUrl;
                         smsManager.sendTextMessage(number, null, message, null, null);
                     }
                 }
 
                 cursor.close();
                 Toast.makeText(this, "SOS sent with location!", Toast.LENGTH_SHORT).show();
-
-                // 📌 NEW: Notify all staff via Firebase
-                sendSOSNotification(latitude, longitude);
 
                 // Trigger the Map functionality to find nearby safe places
                 try {
@@ -852,47 +832,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         });
     }
 
-    // Sends an SOS notification to all staff members via Firebase
-    private void sendSOSNotification(double latitude, double longitude) {
-        String firebaseServerKey = "YOUR_SERVER_KEY"; // Get this from Firebase Console
-        String topic = "/topics/staff_alerts"; // All staff members subscribed to this topic will receive the alert
-
-        try {
-            JSONObject notification = new JSONObject();
-            notification.put("title", "🚨 SOS Alert!");
-            notification.put("message", "Someone nearby needs help!");
-            notification.put("latitude", latitude);
-            notification.put("longitude", longitude);
-
-            JSONObject data = new JSONObject();
-            data.put("to", topic);
-            data.put("data", notification);
-
-            new Thread(() -> {
-                try {
                     URL url = new URL("https://fcm.googleapis.com/fcm/send");
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Authorization", "key=" + firebaseServerKey);
-                    conn.setRequestProperty("Content-Type", "application/json");
-                    conn.setDoOutput(true);
-
-                    OutputStream os = conn.getOutputStream();
-                    os.write(data.toString().getBytes());
-                    os.flush();
-                    os.close();
-
-                    int responseCode = conn.getResponseCode();
-                    Log.d("FCM", "Response Code: " + responseCode);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     // Checks and requests SMS permissions if not already granted
     private void checkAndRequestPermissions() {
         // List of permissions to request
@@ -916,7 +856,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
-    // Permissions
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
