@@ -22,7 +22,7 @@
   
 **Steps**<br/>  
   1. Clone the repository:
-  2. git clone https://github.com/yourusername/alertify.git
+  2. git clone https://github.com/miguellobato96/alertify.git
   3. Open the project in Android Studio.
   4. Sync Gradle and install dependencies.
   5. Replace the YOUR_API_KEY placeholder in AndroidManifest.xml with your Google Maps API key.
